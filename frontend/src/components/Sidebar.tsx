@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import ChatSessionsList from '@/components/chat/SessionsList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useChatSession } from '@/context/ChatSessionContext';
+import { IChatSession } from '@/types/chat.interface';
 
 const Sidebar: React.FC = () => {
   const { user } = useAuth();
@@ -118,7 +119,15 @@ const Sidebar: React.FC = () => {
                 selectedSessionId={selectedSessionId}
                 setSelectedSessionId={setSelectedSessionId}
                 chatSessions={chatSessions}
-                setChatSessions={setChatSessions}
+                setChatSessions={(value) => {
+                  // Convert Dispatch<SetStateAction<IChatSession[]>> to the expected type
+                  if (typeof value === 'function') {
+                    const updater = value as (prev: IChatSession[]) => IChatSession[];
+                    setChatSessions(updater(chatSessions));
+                  } else {
+                    setChatSessions(value);
+                  }
+                }}
               />
             )}
             {error && (

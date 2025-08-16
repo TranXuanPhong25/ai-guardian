@@ -8,7 +8,8 @@ import ChatMessage from './Message';
 export default function ChatMessages({
   messages,
   isLoading,
-}: Pick<ChatHandler, 'messages' | 'isLoading'>) {
+  sessionId,
+}: Pick<ChatHandler, 'messages' | 'isLoading'> & { sessionId?: string }) {
   const scrollableChatContainerRef = useRef<HTMLDivElement>(null);
 
   const messageLength = messages.length;
@@ -40,7 +41,7 @@ export default function ChatMessages({
     >
       <div className="flex flex-col gap-2 md:gap-4 lg:gap-5 max-w-4xl mx-auto">
         {messages.map((m, i) => {
-          return <ChatMessage key={m.id} chatMessage={m} />;
+          return <ChatMessage key={m.id} chatMessage={m} sessionId={sessionId} />;
         })}
         {isPending && (
           <div className="flex justify-center items-center pt-10">

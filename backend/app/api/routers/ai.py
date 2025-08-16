@@ -1,8 +1,8 @@
-
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.schemas import ai as ai_schema
+from app.services import chat_service
 
- 
+
 router = APIRouter(prefix="/ai", tags=["AI"])
 
 # Chỉ gửi prompt cho gemini

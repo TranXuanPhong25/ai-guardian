@@ -1,5 +1,6 @@
 from sqlalchemy import Column, ForeignKey, String, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from app.database.database import Base
 import uuid
 
@@ -10,3 +11,6 @@ class Profile(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
+    
+    # Relationships
+    rag_documents = relationship("RagDocument", back_populates="profile")

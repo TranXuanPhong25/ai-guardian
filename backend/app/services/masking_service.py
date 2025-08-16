@@ -1,69 +1,87 @@
-
-# masking_service.py
-# Service để phát hiện và ẩn danh hóa (masking) thông tin nhạy cảm (PII) trong văn bản.
-# Sử dụng Presidio để nhận diện PII và sinh pseudonym, lưu mapping vào database.
-
 import hashlib
-import asyncpg
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
+from presidio_anonymizer.entities import OperatorConfig
 import os
 from dotenv import load_dotenv, find_dotenv
-from typing import Optional
-
+from typing import Optional, Tuple, Dict
+from sqlalchemy.orm import Session
+from app.database.database import SessionLocal
+from app.models.pii_mapping import PiiMapping
+import logging
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env'))
 
+
 class PIIMaskerService:
     """
-    Service để phát hiện và masking (ẩn danh hóa) thông tin nhạy cảm (PII) trong văn bản.
+    Service để phát hiện và ẩn danh hóa (masking) thông tin nhạy cảm (PII) trong văn bản.
     - Sử dụng Presidio để nhận diện PII.
     - Sinh pseudonym cho từng loại PII và lưu mapping vào database.
     """
+
     def __init__(self):
-        # Lấy secret key và cấu hình database từ .env
+        # Lấy secret key từ .env
         self.secret_key = os.getenv('SECRET_KEY', 'my_secret_key_123')
-        self.db_url = os.getenv('DATABASE_URL')
         # Khởi tạo Presidio Analyzer và Anonymizer
         self.analyzer = AnalyzerEngine()
         self.anonymizer = AnonymizerEngine()
-        import logging
         self.logger = logging.getLogger(__name__)
+        # Thread pool cho database operations
+        self.executor = ThreadPoolExecutor(max_workers=4)
 
-    async def initialize_database(self) -> None:
+    def _save_pii_mapping_sync(self, entity_type: str, original_value: str, pseudonymized_value: str) -> str:
         """
-        Khởi tạo bảng và index cần thiết cho lưu mapping PII trong database.
+        Sync version của save_pii_mapping để chạy trong thread pool
         """
-        async with asyncpg.create_pool(dsn=self.db_url) as pool:
-            async with pool.acquire() as conn:
-                await conn.execute("""
-                    CREATE TABLE IF NOT EXISTS pii_mappings (
-                        id SERIAL PRIMARY KEY,
-                        entity_type VARCHAR(50) NOT NULL,
-                        original_value TEXT NOT NULL,
-                        pseudonymized_value TEXT NOT NULL,
-                        hash_key TEXT NOT NULL,
-                        CONSTRAINT unique_entity_value UNIQUE (entity_type, original_value)
-                    );
-                    CREATE INDEX IF NOT EXISTS idx_entity_hash ON pii_mappings (entity_type, hash_key);
-                """)
+        hash_val = hashlib.sha256((original_value + self.secret_key).encode()).hexdigest()
+        
+        db = SessionLocal()
+        try:
+            # Tìm xem đã có mapping này chưa
+            existing = db.query(PiiMapping).filter(
+                PiiMapping.entity_type == entity_type,
+                PiiMapping.original_value == original_value
+            ).first()
+            
+            if existing:
+                # Cập nhật mapping hiện có
+                existing.pseudonymized_value = pseudonymized_value
+                existing.hash_key = hash_val
+            else:
+                # Tạo mapping mới
+                new_mapping = PiiMapping(
+                    entity_type=entity_type,
+                    original_value=original_value,
+                    pseudonymized_value=pseudonymized_value,
+                    hash_key=hash_val
+                )
+                db.add(new_mapping)
+            
+            db.commit()
+            return pseudonymized_value
+            
+        except Exception as e:
+            self.logger.error(f"Error saving PII mapping: {e}")
+            db.rollback()
+            return pseudonymized_value
+        finally:
+            db.close()
 
     async def save_pii_mapping(self, entity_type: str, original_value: str, pseudonymized_value: str) -> str:
         """
-        Lưu mapping giữa giá trị gốc và pseudonym vào database.
-        Nếu đã tồn tại, cập nhật lại pseudonym và hash_key.
+        Async version - lưu mapping giữa giá trị gốc và pseudonym vào database.
         """
-        hash_val = hashlib.sha256((original_value + self.secret_key).encode()).hexdigest()
-        async with asyncpg.create_pool(dsn=self.db_url) as pool:
-            async with pool.acquire() as conn:
-                await conn.execute("""
-                    INSERT INTO pii_mappings (entity_type, original_value, pseudonymized_value, hash_key)
-                    VALUES ($1, $2, $3, $4)
-                    ON CONFLICT (entity_type, original_value)
-                    DO UPDATE SET pseudonymized_value = EXCLUDED.pseudonymized_value,
-                                  hash_key = EXCLUDED.hash_key
-                """, entity_type, original_value, pseudonymized_value, hash_val)
-        return pseudonymized_value
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            self.executor, 
+            self._save_pii_mapping_sync, 
+            entity_type, 
+            original_value, 
+            pseudonymized_value
+        )
 
     async def generate_pseudonym(self, entity_type: str, value: str) -> str:
         """
@@ -73,9 +91,10 @@ class PIIMaskerService:
         """
         hash_val = hashlib.sha256((value + self.secret_key).encode()).hexdigest()[:6].upper()
         pseudonym_map = {
-            "NAME": f"Name_{hash_val}",
+            "PERSON": f"Name_{hash_val}",
             "EMAIL_ADDRESS": f"Email_{hash_val}@example.com",
             "PHONE_NUMBER": f"Phone_{hash_val}",
+            "US_SSN": f"US_SSN_{hash_val}",
             "DATE_TIME": f"Date_{hash_val}",
             "CREDIT_CARD": f"CC_{hash_val}",
             "ADDRESS": f"Address_{hash_val}",
@@ -84,28 +103,55 @@ class PIIMaskerService:
         pseudonym = pseudonym_map.get(entity_type, pseudonym_map["DEFAULT"])
         return await self.save_pii_mapping(entity_type, value, pseudonym)
 
-    async def mask_text(self, text: str) -> Optional[str]:
+    async def mask_text(self, text: str) -> Tuple[str, Dict[str, str]]:
         """
-        Phát hiện và masking tất cả PII trong văn bản đầu vào.
-        - Trả về văn bản đã được thay thế các giá trị PII bằng pseudonym.
+        Phát hiện và masking tất cả PII trong văn bản đầu vào sử dụng AnonymizerEngine.
+        - Trả về tuple (masked_text, mapping) với mapping từ pseudonym -> original_value
         """
         try:
+            if not text or not text.strip():
+                return "", {}
+
             # Phân tích văn bản để tìm các entity PII
             analyzer_results = self.analyzer.analyze(text=text, language='en')
-            # Sắp xếp ngược để thay thế từ cuối lên đầu, tránh sai vị trí
-            analyzer_results = sorted(analyzer_results, key=lambda x: x.start, reverse=True)
-            masked_text = text
+            
+            if not analyzer_results:
+                return text, {}
 
+            # Tạo danh sách các operator tùy chỉnh cho từng entity và mapping
+            operators = {}
+            mapping = {}
+            
+            # Tạo tất cả pseudonyms async để speed up
+            pseudonym_tasks = []
             for res in analyzer_results:
                 original_value = text[res.start:res.end]
-                pseudonym = await self.generate_pseudonym(res.entity_type, original_value)
-                masked_text = masked_text[:res.start] + pseudonym + masked_text[res.end:]
+                task = self.generate_pseudonym(res.entity_type, original_value)
+                pseudonym_tasks.append((res, original_value, task))
+            
+            # Chờ tất cả pseudonyms được tạo
+            for res, original_value, task in pseudonym_tasks:
+                pseudonym = await task
+                
+                # Presidio AnonymizerEngine cần OperatorConfig object
+                operators[res.entity_type] = OperatorConfig("replace", {"new_value": pseudonym})
+                
+                # Lưu mapping từ pseudonym về original value
+                mapping[pseudonym] = original_value
 
-            return masked_text
+            # Sử dụng AnonymizerEngine để xử lý thay thế
+            anonymized_result = self.anonymizer.anonymize(
+                text=text,
+                analyzer_results=analyzer_results,
+                operators=operators
+            )
+
+            return anonymized_result.text, mapping
+            
         except Exception as e:
-            # Nếu có lỗi, log và trả về None
+            # Nếu có lỗi, log và trả về text gốc với mapping rỗng
             self.logger.error(f"Error masking text: {str(e)}")
-            return None
+            return text, {}
 
 
 # Khởi tạo instance dùng chung cho service masking PII

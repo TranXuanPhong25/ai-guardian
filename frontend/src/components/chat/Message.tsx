@@ -6,49 +6,54 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
-import { maskingService } from '@/services/maskingService';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { useSensitiveValidation, useMaskingOperations } from '@/hooks/useQueries';
 
-export default function ChatMessage({ chatMessage }: { chatMessage: Message }) {
+export default function ChatMessage({ chatMessage, sessionId }: { chatMessage: Message; sessionId?: string }) {
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 });
   const [isMasked, setIsMasked] = useState(false);
   const [maskedContent, setMaskedContent] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasSensitive, setHasSensitive] = useState(false);
-  const [mapping, setMapping] = useState<Record<string, string>>({});
 
-  // Check for sensitive content and prepare masked version
-  useEffect(() => {
-    const checkAndMaskContent = async () => {
-      if (!chatMessage.content) return;
-      
-      try {
-        // Check if the message contains sensitive information
-        const validationResult = await maskingService.validateSensitive(chatMessage.content);
-        setHasSensitive(validationResult.sensitive);
-
-        // If it contains sensitive data, prepare masked version
-        if (validationResult.sensitive) {
-          const maskedResult = await maskingService.maskText(chatMessage.content);
-          setMaskedContent(maskedResult.masked_text);
-          setMapping(maskedResult.mapping);
-        }
-      } catch (error) {
-        console.error('Error checking for sensitive content:', error);
-      }
-    };
-
-    checkAndMaskContent();
-  }, [chatMessage.content]);
+  // Only validate for user messages
+  const shouldValidate = chatMessage.role === 'user' && !!chatMessage.content?.trim();
+  
+  // Use React Query for sensitive validation
+  const { data: validationResult } = useSensitiveValidation(
+    chatMessage.content || '', 
+    shouldValidate
+  );
+  
+  const hasSensitive = validationResult?.alert !== null && chatMessage.role === 'user';
+  
+  // Use mutation for masking (only when user toggles)
+  const { maskText: maskTextMutation } = useMaskingOperations();
 
   // Toggle between masked and unmasked content
-  const toggleMask = () => {
-    setIsMasked(!isMasked);
+  const toggleMask = async () => {
+    if (!hasSensitive) return;
+    
+    if (!isMasked && !maskedContent) {
+      // Need to fetch masked content
+      try {
+        const result = await maskTextMutation.mutateAsync({
+          sessionId: sessionId || 'default',
+          content: chatMessage.content || ''
+        });
+        setMaskedContent(result.masked_text);
+        setIsMasked(true);
+      } catch (error) {
+        console.error('Error masking content:', error);
+      }
+    } else {
+      setIsMasked(!isMasked);
+    }
   };
 
   // Get the current content to display
-  const displayContent = isMasked && hasSensitive ? maskedContent : chatMessage.content;
+  const displayContent = isMasked && hasSensitive && maskedContent 
+    ? maskedContent 
+    : chatMessage.content;
 
   return (
     <Card className={cn(
