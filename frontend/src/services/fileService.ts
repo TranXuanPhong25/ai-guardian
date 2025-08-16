@@ -14,6 +14,7 @@ export interface FileUploadResponse {
   file_id: number;
   filename: string;
   created_at: string;
+  url: string;
 }
 
 export interface FileExtractResponse {
@@ -27,11 +28,11 @@ class FileService {
   private async getAuthToken(): Promise<string> {
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session?.access_token) {
       throw new Error('Not authenticated');
     }
-    
+
     return session.access_token;
   }
 
@@ -76,7 +77,7 @@ class FileService {
         'Authorization': `Bearer ${token}`,
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch files: ${response.statusText}`);
     }
@@ -131,24 +132,24 @@ class FileService {
     try {
       // Nếu file_path là URL đầy đủ (MinIO), dùng trực tiếp
       const fileUrl = fileItem.file_path;
-      
+
       const response = await fetch(fileUrl);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to download file: ${response.statusText}`);
       }
 
       const blob = await response.blob();
-      
+
       // Tạo download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = fileItem.filename;
-      
+
       document.body.appendChild(link);
       link.click();
-      
+
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -209,11 +210,11 @@ class FileService {
    */
   formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 

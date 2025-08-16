@@ -8,7 +8,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.database import database
-from app.models import user, conversation, message, mask_mapping, file, rag_document
+from app.models import user, chat_session, message, mask_mapping, file, rag_document, message_file, profile, pii_mapping
 
 config = context.config
 fileConfig(config.config_file_name)

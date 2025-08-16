@@ -1,13 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { ArrowUp, X, Paperclip, Eye, EyeOff, AlertTriangle, Loader2, Square, Check } from 'lucide-react';
 import { ChatHandler, ILLMModel } from '@/types/chat.interface';
-import { AttachedFile } from '@/types/file.interface';
 import ModelsDropdown from './ModelsDropdown';
-import FilePreview from './FilePreview';
 import SafetyWarning from '@/components/SafetyWarning';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useSensitiveValidation, useMaskingOperations } from '@/hooks/useQueries';
+import FileUrlPreview from './FileUrlPreview';
 
 interface MessageInputProps
   extends Pick<
@@ -15,19 +14,18 @@ interface MessageInputProps
     | 'isLoading'
     | 'input'
     | 'handleInputChange'
+    | 'handleSubmit'
     | 'setInput'
     | 'stop'
-    | 'onFileUpload'
-    | 'onFileError'
   > {
-  handleSubmit: (
-    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>,
-    options?: { data: FormData; hasFiles?: boolean }
-  ) => void;
   // Model selection
   model: ILLMModel;
   setModel: React.Dispatch<React.SetStateAction<ILLMModel>>;
   sessionId: string;
+  // File handling with URLs
+  attachedFiles: string[];
+  onFileAttach: (files: File[]) => Promise<void>;
+  onRemoveFile: (index: number) => void;
 }
 
 export default function MessageInput({
@@ -39,23 +37,23 @@ export default function MessageInput({
   stop,
   model,
   setModel,
-  onFileUpload,
-  onFileError,
   sessionId,
+  attachedFiles,
+  onFileAttach,
+  onRemoveFile,
 }: MessageInputProps) {
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
-  const [messageAnalysis, setMessageAnalysis] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
   const [isMasked, setIsMasked] = useState(false);
   const [maskedContent, setMaskedContent] = useState<string>('');
   const [isFetchingMask, setIsFetchingMask] = useState(false);
   const [maskMapping, setMaskMapping] = useState<Record<string, string>>({});
+  
+  // File input reference
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Use React Query for sensitive validation  
-  const { data: validationResult } = useSensitiveValidation(input || '', !!input?.trim());
-  const sensitiveFound = validationResult?.alert !== null;
-
+  // Use React Query for sensitive validation with debouncing
+  const { data: validationResult, isLoading: isValidating } = useSensitiveValidation(input || '', !!input?.trim(), 300);
+  const alertContent = !!input.trim() ? validationResult?.alert : null;
+  const sensitiveFound = alertContent !== null;
   // Use mutations for masking operations
   const { maskText: maskTextMutation, unmaskText: unmaskTextMutation } = useMaskingOperations();
 
@@ -118,57 +116,26 @@ export default function MessageInput({
       setIsMasked(!isMasked);
     }
   };
-  // Remove attached file
-  const removeFile = (fileId: string) => {
-    setAttachedFiles(prev => prev.filter(f => f.id !== fileId));
-
+  // Remove attached file by index
+  const removeFile = (index: number) => {
+    onRemoveFile(index);
   };
 
-  // Add file to attachments
+  // Add file to attachments (upload immediately)
   const addFileToAttachments = async (file: File) => {
-    const fileId = Date.now().toString();
-    let preview: string | undefined;
-
-    // Create preview for images
-    if (file.type.startsWith('image/')) {
-      preview = URL.createObjectURL(file);
-    }
-
-    const attachedFile: AttachedFile = {
-      file,
-      id: fileId,
-      preview
-    };
-
-    setAttachedFiles(prev => [...prev, attachedFile]);
-
-    // Analyze file safety
-
-    // Call the onFileUpload prop if provided
-    if (onFileUpload) {
-      try {
-        await onFileUpload(file);
-      } catch (error) {
-        // Remove file from attachments if upload fails
-        setAttachedFiles(prev => prev.filter(f => f.id !== fileId));
-      }
+    try {
+      await onFileAttach([file]);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      // Show error to user if needed
     }
   };
-
-  // Auto-analyze with React Query - no manual useEffect needed
-  useEffect(() => {
-    // Just update UI states based on React Query results
-    setShowWarning(sensitiveFound);
-  }, [sensitiveFound]);
 
   const onSubmit = async (
     e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
     e.preventDefault();
-    if (!input.trim() && attachedFiles.length === 0) return;
-
-    // Create FormData for file uploads
-    const formData = new FormData();
+    if (!input.trim() && attachedFiles.length ===0) return;
     
     // If content is masked, we need to unmask it before sending
     let messageToSend = input;
@@ -186,27 +153,14 @@ export default function MessageInput({
       }
     }
     
-    formData.append('message', messageToSend);
-    formData.append('model', model.id);
-
-    // Add files to FormData
-    attachedFiles.forEach((attachedFile) => {
-      formData.append('files', attachedFile.file);
-    });
-
     // Clear the input field and attachments
-    setInput!('');
-    setAttachedFiles([]);
+    setInput!(messageToSend); // Set the unmasked content temporarily
     setMaskedContent('');
     setMaskMapping({});
     setIsMasked(false);
-    // Remove setSensitiveFound since it's computed from React Query
 
-    // Call handleSubmit with FormData
-    handleSubmit(e, {
-      data: formData,
-      hasFiles: attachedFiles.length > 0
-    });
+    // Call handleSubmit - useChat will handle the rest
+    handleSubmit(e);
   };
 
   // allows to submit chat with Cmd / Ctrl + Enter
@@ -222,48 +176,75 @@ export default function MessageInput({
     const items = e.clipboardData?.items;
     if (!items) return;
 
+    const filesToUpload: File[] = [];
+
+    // Collect all files from paste
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-
-      // Check if the item is a file
       if (item.kind === 'file') {
-        e.preventDefault(); // Prevent default paste behavior
         const file = item.getAsFile();
-
         if (file) {
-          try {
-            // Add file to attachments instead of direct upload
-            await addFileToAttachments(file);
-          } catch (error) {
-            console.error('Error handling pasted file:', error);
-            const errorMsg = `Error processing the pasted file: ${error}`;
-            if (onFileError) {
-              onFileError(errorMsg);
-            } else {
-              alert(errorMsg);
-            }
-          }
+          filesToUpload.push(file);
         }
+      }
+    }
+
+    // If we have files, prevent default paste and upload them
+    if (filesToUpload.length > 0) {
+      e.preventDefault();
+      try {
+        // Upload all files at once
+        await onFileAttach(filesToUpload);
+      } catch (error) {
+        console.error('Error handling pasted files:', error);
+        const errorMsg = `Error processing ${filesToUpload.length} pasted file(s): ${error}`;
+        alert(errorMsg);
       }
     }
   };
 
+  // Handle file input change (support multiple files)
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // Convert FileList to Array and upload all at once
+      const fileArray = Array.from(files);
+      onFileAttach(fileArray);
+    }
+    // Reset input value to allow selecting the same file again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  // Trigger file input
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="w-full relative">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileInput}
+        multiple
+        accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.xls"
+        className="hidden"
+      />
+      
       {/* Safety Warnings */}
-      {showWarning && messageAnalysis  && (
+      {alertContent  && (
         <SafetyWarning
-          alertContent={messageAnalysis}
+          alertContent={alertContent}
           type="message"
-          onDismiss={() => setShowWarning(false)}
-          onProceed={() => setShowWarning(false)}
         />
       )}
       
 
       <form onSubmit={onSubmit}>
         <div className="bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl space-y-2 max-w-4xl mx-4 md:mx-8 lg:mx-auto">
-        <FilePreview
+        <FileUrlPreview
           attachedFiles={attachedFiles}
           onRemoveFile={removeFile}
         />
@@ -275,7 +256,7 @@ export default function MessageInput({
             onChange={handleInputChange}
             onPaste={handlePaste}
             placeholder={isFetchingMask ? "Masking content..." : "Ask anything..."}
-            className={`w-full bg-transparent p-2 outline-none resize-none ${isMasked && sensitiveFound ? 'bg-yellow-50/20 dark:bg-yellow-900/10' : ''}`}
+            className={`w-full bg-transparent p-2 outline-none resize-none rounded-md ${isMasked && sensitiveFound ? 'bg-yellow-50/20 dark:bg-yellow-300/30 ' : ''}`}
             rows={Math.min((isMasked ? maskedContent : input).split('\n').length, 8)}
             disabled={isLoading || isFetchingMask}
             onKeyDown={handleKeyDown}
@@ -291,9 +272,19 @@ export default function MessageInput({
           {/* Sensitive content indicator */}
           {isMasked && !isFetchingMask && (
             <div className="absolute right-2 top-2">
-              <Badge variant="outline" className="bg-green-50 text-green-800 border-green-300 flex items-center gap-1">
+              <Badge variant="outline" className="!bg-green-50 !text-green-800 !300 flex items-center gap-1">
                 <Check className="h-3 w-3" />
                 <span className="text-xs">Content masked</span>
+              </Badge>
+            </div>
+          )}
+          
+          {/* Validation in progress indicator */}
+          {isValidating && input?.trim() && (
+            <div className="absolute right-2 top-2">
+              <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-300 flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span className="text-xs">Checking content...</span>
               </Badge>
             </div>
           )}
@@ -305,18 +296,41 @@ export default function MessageInput({
             {/* Model Dropdown */}
             <ModelsDropdown model={model} setModel={setModel} />
             
+            {/* File attachment button */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={triggerFileInput}
+              title="Attach files"
+              className="rounded-full h-8 w-8 flex items-center justify-center"
+              disabled={isLoading}
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
+            
             {/* Mask/Unmask toggle button */}
             <Button
               type="button"
               variant={sensitiveFound ? "outline" : "ghost"}
               size="icon"
               onClick={() => toggleMask()}
-              title={isMasked ? 'Show original content' : 'Mask sensitive content'}
-              className={`rounded-full h-8 w-8 flex items-center justify-center ${sensitiveFound ? 'border-yellow-300 hover:bg-yellow-50' : ''}`}
+              title={
+                isValidating 
+                  ? 'Checking for sensitive content...' 
+                  : isMasked 
+                    ? 'Show original content' 
+                    : 'Mask sensitive content'
+              }
+              className={`rounded-full h-8 w-8 flex items-center justify-center ${
+                sensitiveFound ? 'border-yellow-300 hover:bg-yellow-50' : ''
+              } ${isValidating ? 'border-blue-300 hover:bg-blue-50' : ''}`}
               disabled={isFetchingMask || !input.trim()}
             >
               {isFetchingMask ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isValidating ? (
+                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
               ) : isMasked ? (
                 <Eye className={`h-4 w-4 ${sensitiveFound ? 'text-yellow-600' : ''}`} />
               ) : (
@@ -331,10 +345,9 @@ export default function MessageInput({
               variant="default"
               size="icon"
               disabled={
-                (!input.trim() && !isMasked) || 
+                ((!input.trim() && attachedFiles.length === 0) && !isMasked) || 
                 (isMasked && !maskedContent.trim()) || 
-                isMasked ||
-                isAnalyzing
+                isMasked 
               }
               type="submit"
               className="rounded-full"

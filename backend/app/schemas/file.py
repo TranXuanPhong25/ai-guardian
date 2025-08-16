@@ -8,6 +8,7 @@ class FileUploadRequest(BaseModel):
 class FileUploadResponse(BaseModel):
     file_id: int
     filename: str
+    url: str
     created_at: datetime
 
 class FileExtractResponse(BaseModel):

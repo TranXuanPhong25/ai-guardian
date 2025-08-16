@@ -3,6 +3,12 @@ from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
 
+# File attachment schema for messages
+class MessageFileResponse(BaseModel):
+    file_id: int
+    filename: str
+    file_path: str
+
 # this schema is for returning message from db as response
 class MessageResponse(BaseModel):
     id: UUID
@@ -10,6 +16,7 @@ class MessageResponse(BaseModel):
     role: str
     content: str
     created_at: datetime
+    attached_files: List[MessageFileResponse] = []
 
 # this schema is for returning chat session from db as response
 class ChatSessionResponse(BaseModel):
@@ -34,6 +41,11 @@ class ChatRequest(BaseModel):
     sessionId: Optional[UUID]
     model: str
     messages: List[ChatMessage]
+
+class ChatRequestWithFiles(BaseModel):
+    messages: List[ChatMessage]
+    model: str
+    fileUrls: Optional[List[str]] = []
 
 class ChatResponse(BaseModel):
     response: str
