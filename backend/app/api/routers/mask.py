@@ -20,26 +20,38 @@ pii_unmasker_service = PIIUnmaskerService()
 async def mask_content(request: mask_schema.MaskRequest, db: Session = Depends(get_db)):
     masked_text, mapping = await pii_masker_service.mask_text(request.content)
     # Lưu mapping vào DB
-    mask_db = MaskMapping(conversation_id=request.conversation_id, mapping=mapping)
-    db.add(mask_db)
+    mask_db = db.get(MaskMapping, request.session_id)
+    if mask_db:
+        mask_db.mapping = mapping
+    else:
+        mask_db = MaskMapping(session_id=request.session_id, mapping=mapping)
+        db.add(mask_db)
     db.commit()
     db.refresh(mask_db)
-    return {"masked_text": masked_text, "mapping": mapping, "mapping_id": mask_db.id}
+    return {"masked_text": masked_text, "mapping": mapping, "mapping_id": mask_db.session_id}
 # Phần này của AI
 # API unmask nội dung đã được masking
-# Nhận masked_text và mapping, gọi service unmask (giả lập: đảo ngược lại chuỗi), trả về text gốc
+# Nhận masked_text và mapping, gọi service unmask, trả về text gốc
 @router.post("/unmask", response_model=dict)
-async def unmask_content(request: dict, db: Session = Depends(get_db)):
-    masked_text = request.get("masked_text")
-    mapping = request.get("mapping")
-    text = await pii_unmasker_service.unmask_text(masked_text, mapping)
-    return {"text": text}
+def unmask_content(request: dict):
+    try:
+        masked_text = request.get("masked_text", "")
+        mapping = request.get("mapping", {})
+        
+        if not masked_text:
+            return {"text": ""}
+        
+        # Gọi service unmask (không async nữa)
+        text = pii_unmasker_service.unmask_text(masked_text, mapping)
+        return {"text": text}
+    except Exception as e:
+        return {"error": str(e), "text": masked_text or ""}
 
 # API lấy mapping masking của một hội thoại theo conversation_id
 # Nhận chat_id, truy vấn DB để lấy mapping, trả về mapping nếu có
 @router.get("/mask-mapping/{chat_id}", response_model=dict)
 def get_mask_mapping(chat_id: int, db: Session = Depends(get_db)):
-    mapping_obj = db.query(MaskMapping).filter(MaskMapping.conversation_id == chat_id).first()
+    mapping_obj = db.query(MaskMapping).filter(MaskMapping.session_id == chat_id).first()
     mapping = mapping_obj.mapping if mapping_obj else {}
     return {"mapping": mapping}
 

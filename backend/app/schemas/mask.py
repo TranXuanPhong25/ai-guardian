@@ -4,17 +4,17 @@ from datetime import datetime
 
 
 class MaskRequest(BaseModel):
-    conversation_id: str  # Accept UUID as string
+    session_id: str  # Accept UUID as string
     content: str
 
 
 class UnmaskRequest(BaseModel):
-    conversation_id: str  # Accept UUID as string
+    session_id: str  # Accept UUID as string
     content: str
 
 
 class MaskMappingResponse(BaseModel):
-    conversation_id: str  # Accept UUID as string
+    session_id: str  # Accept UUID as string
     mapping: Dict[str, Any]
     created_at: datetime
 

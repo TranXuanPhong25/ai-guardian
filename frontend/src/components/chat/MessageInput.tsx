@@ -1,14 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { ArrowUp, X, Paperclip, Eye, EyeOff, AlertTriangle, Loader2, Square } from 'lucide-react';
+import { ArrowUp, X, Paperclip, Eye, EyeOff, AlertTriangle, Loader2, Square, Check } from 'lucide-react';
 import { ChatHandler, ILLMModel } from '@/types/chat.interface';
 import { AttachedFile } from '@/types/file.interface';
 import ModelsDropdown from './ModelsDropdown';
 import FilePreview from './FilePreview';
 import SafetyWarning from '@/components/SafetyWarning';
 import { useState, useRef, useEffect } from 'react';
-import { safetyService, SafetyResult, FileAnalysis } from '@/services/safetyService';
-import { maskingService } from '@/services/maskingService';
 import { Badge } from '@/components/ui/badge';
+import { useSensitiveValidation, useMaskingOperations } from '@/hooks/useQueries';
 
 interface MessageInputProps
   extends Pick<
@@ -28,6 +27,7 @@ interface MessageInputProps
   // Model selection
   model: ILLMModel;
   setModel: React.Dispatch<React.SetStateAction<ILLMModel>>;
+  sessionId: string;
 }
 
 export default function MessageInput({
@@ -41,34 +41,40 @@ export default function MessageInput({
   setModel,
   onFileUpload,
   onFileError,
+  sessionId,
 }: MessageInputProps) {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [messageAnalysis, setMessageAnalysis] = useState<SafetyResult | null>(null);
-  const [fileAnalyses, setFileAnalyses] = useState<Map<string, FileAnalysis>>(new Map());
+  const [messageAnalysis, setMessageAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [isMasked, setIsMasked] = useState(false);
   const [maskedContent, setMaskedContent] = useState<string>('');
   const [isFetchingMask, setIsFetchingMask] = useState(false);
   const [maskMapping, setMaskMapping] = useState<Record<string, string>>({});
-  const [sensitiveFound, setSensitiveFound] = useState(false);
+
+  // Use React Query for sensitive validation  
+  const { data: validationResult } = useSensitiveValidation(input || '', !!input?.trim());
+  const sensitiveFound = validationResult?.alert !== null;
+
+  // Use mutations for masking operations
+  const { maskText: maskTextMutation, unmaskText: unmaskTextMutation } = useMaskingOperations();
 
   // Toggle mask and fetch masked content
   const toggleMask = async () => {
     // If already fetching, don't do anything
-    if (isFetchingMask) return;
+    if (isFetchingMask || maskTextMutation.isPending) return;
     
     if (!isMasked && input.trim()) {
       setIsFetchingMask(true);
       try {
-        // First check if text contains sensitive information
-        const validationResult = await maskingService.validateSensitive(input);
-        setSensitiveFound(validationResult.sensitive);
+        // setSensitiveFound is no longer needed since sensitiveFound is computed from React Query
         
-        if (validationResult.sensitive) {
-          // Fetch masked content from service
-          const maskResult = await maskingService.maskText(input);
+        if (sensitiveFound) {
+          // Use mutation to mask text
+          const maskResult = await maskTextMutation.mutateAsync({
+            sessionId: sessionId,
+            content: input
+          });
           setMaskedContent(maskResult.masked_text);
           setMaskMapping(maskResult.mapping);
           setIsMasked(true);
@@ -93,8 +99,11 @@ export default function MessageInput({
       // When unmasking, restore original content if needed
       setIsFetchingMask(true);
       try {
-        // If we have mask mappings, use the unmask service
-        const unmaskResult = await maskingService.unmaskText(maskedContent, maskMapping);
+        // If we have mask mappings, use the unmask mutation
+        const unmaskResult = await unmaskTextMutation.mutateAsync({
+          maskedText: maskedContent,
+          mapping: maskMapping
+        });
         if (unmaskResult && unmaskResult.text && setInput) {
           setInput(unmaskResult.text);
         }
@@ -112,11 +121,7 @@ export default function MessageInput({
   // Remove attached file
   const removeFile = (fileId: string) => {
     setAttachedFiles(prev => prev.filter(f => f.id !== fileId));
-    setFileAnalyses(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(fileId);
-      return newMap;
-    });
+
   };
 
   // Add file to attachments
@@ -138,16 +143,6 @@ export default function MessageInput({
     setAttachedFiles(prev => [...prev, attachedFile]);
 
     // Analyze file safety
-    try {
-      const analysis = await safetyService.analyzeFile(file);
-      setFileAnalyses(prev => new Map(prev).set(fileId, analysis));
-      
-      if (!analysis.isSafe) {
-        setShowWarning(true);
-      }
-    } catch (error) {
-      console.error('File analysis error:', error);
-    }
 
     // Call the onFileUpload prop if provided
     if (onFileUpload) {
@@ -156,45 +151,15 @@ export default function MessageInput({
       } catch (error) {
         // Remove file from attachments if upload fails
         setAttachedFiles(prev => prev.filter(f => f.id !== fileId));
-        setFileAnalyses(prev => {
-          const newMap = new Map(prev);
-          newMap.delete(fileId);
-          return newMap;
-        });
-        throw error;
       }
     }
   };
 
-  // Analyze message when input changes
+  // Auto-analyze with React Query - no manual useEffect needed
   useEffect(() => {
-    if (input.trim()) {
-      setIsAnalyzing(true);
-      const timeoutId = setTimeout(async () => {
-        try {
-          const analysis = await safetyService.analyzeMessage(input);
-          setMessageAnalysis(analysis);
-          if (!analysis.isSafe) {
-            setShowWarning(true);
-          }
-          
-          // Also check for sensitive content
-          const sensitiveCheck = await maskingService.validateSensitive(input);
-          setSensitiveFound(sensitiveCheck.sensitive);
-        } catch (error) {
-          console.error('Message analysis error:', error);
-        } finally {
-          setIsAnalyzing(false);
-        }
-      }, 500); // Debounce 500ms
-      
-      return () => clearTimeout(timeoutId);
-    } else {
-      setMessageAnalysis(null);
-      setIsAnalyzing(false);
-      setSensitiveFound(false);
-    }
-  }, [input]);
+    // Just update UI states based on React Query results
+    setShowWarning(sensitiveFound);
+  }, [sensitiveFound]);
 
   const onSubmit = async (
     e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>
@@ -209,7 +174,10 @@ export default function MessageInput({
     let messageToSend = input;
     if (isMasked && Object.keys(maskMapping).length > 0) {
       try {
-        const unmaskResult = await maskingService.unmaskText(maskedContent, maskMapping);
+        const unmaskResult = await unmaskTextMutation.mutateAsync({
+          maskedText: maskedContent,
+          mapping: maskMapping
+        });
         if (unmaskResult && unmaskResult.text) {
           messageToSend = unmaskResult.text;
         }
@@ -232,7 +200,7 @@ export default function MessageInput({
     setMaskedContent('');
     setMaskMapping({});
     setIsMasked(false);
-    setSensitiveFound(false);
+    // Remove setSensitiveFound since it's computed from React Query
 
     // Call handleSubmit with FormData
     handleSubmit(e, {
@@ -283,32 +251,15 @@ export default function MessageInput({
   return (
     <div className="w-full relative">
       {/* Safety Warnings */}
-      {showWarning && messageAnalysis && !messageAnalysis.isSafe && (
+      {showWarning && messageAnalysis  && (
         <SafetyWarning
-          analysis={messageAnalysis}
+          alertContent={messageAnalysis}
           type="message"
           onDismiss={() => setShowWarning(false)}
           onProceed={() => setShowWarning(false)}
         />
       )}
       
-      {showWarning && Array.from(fileAnalyses.entries()).map(([fileId, analysis]) => {
-        if (analysis.isSafe) return null;
-        const file = attachedFiles.find(f => f.id === fileId);
-        return (
-          <SafetyWarning
-            key={fileId}
-            analysis={analysis}
-            type="file"
-            fileName={file?.file.name}
-            onDismiss={() => {
-              removeFile(fileId);
-              setShowWarning(false);
-            }}
-            onProceed={() => setShowWarning(false)}
-          />
-        );
-      })}
 
       <form onSubmit={onSubmit}>
         <div className="bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl space-y-2 max-w-4xl mx-4 md:mx-8 lg:mx-auto">
@@ -338,11 +289,11 @@ export default function MessageInput({
           )}
           
           {/* Sensitive content indicator */}
-          {sensitiveFound && !isFetchingMask && (
+          {isMasked && !isFetchingMask && (
             <div className="absolute right-2 top-2">
-              <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-300 flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" />
-                <span className="text-xs">{isMasked ? "Content masked" : "Sensitive data detected"}</span>
+              <Badge variant="outline" className="bg-green-50 text-green-800 border-green-300 flex items-center gap-1">
+                <Check className="h-3 w-3" />
+                <span className="text-xs">Content masked</span>
               </Badge>
             </div>
           )}
@@ -382,7 +333,7 @@ export default function MessageInput({
               disabled={
                 (!input.trim() && !isMasked) || 
                 (isMasked && !maskedContent.trim()) || 
-                showWarning || 
+                isMasked ||
                 isAnalyzing
               }
               type="submit"

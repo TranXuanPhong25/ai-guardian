@@ -20,3 +20,9 @@ class FileOCRRequest(BaseModel):
 class FileOCRResponse(BaseModel):
     file_id: int
     extracted_text: str
+
+class FileResponse(BaseModel):
+    file_id: int
+    filename: str
+    file_path: str
+    created_at: datetime

@@ -47,7 +47,7 @@ class NotificationService:
         pii_entities = await self.detect_pii(text)
         if pii_entities:
             entity_types = set(entity["entity_type"] for entity in pii_entities)
-            alert_message = f"Cảnh báo: Phát hiện thông tin cá nhân (PII) trong prompt của bạn. Các loại PII: {', '.join(entity_types)}. Hãy cân nhắc chỉnh sửa để bảo vệ dữ liệu cá nhân."
+            alert_message = f"Phát hiện thông tin cá nhân (PII) trong prompt của bạn. Các loại PII: {', '.join(entity_types)}. Hãy cân nhắc chỉnh sửa để bảo vệ dữ liệu cá nhân."
             logger.info(alert_message)
             return alert_message
         return None

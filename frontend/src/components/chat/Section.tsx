@@ -132,7 +132,7 @@ export default function ChatSection({ sessionId }: ChatSectionProps) {
           <>
             {
               messages.length !== 0 &&
-              <ChatMessages messages={messages} isLoading={isLoading} />
+              <ChatMessages messages={messages} isLoading={isLoading} sessionId={currentSessionId} />
 
             }
             <MessageInput
@@ -144,6 +144,7 @@ export default function ChatSection({ sessionId }: ChatSectionProps) {
               model={model}
               setModel={setModel}
               stop={stop}
+              sessionId={currentSessionId}
             />
           </>
         )}

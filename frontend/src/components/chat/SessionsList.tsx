@@ -44,7 +44,6 @@ interface ChatSessionsListProps {
   chatSessions: IChatSession[];
   setChatSessions: Dispatch<SetStateAction<IChatSession[]>>;
 }
-
 const ChatSessionsList: React.FC<ChatSessionsListProps> = ({
   selectedSessionId,
   setSelectedSessionId,

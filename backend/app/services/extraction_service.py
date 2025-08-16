@@ -42,15 +42,15 @@ class FileExtractorService:
             logger.error(f"Error in smoldocling_extract: {str(e)}")
             return ""
 
-    def extract_text(self, file_path: str) -> Optional[str]:
+    def extract_text(self, file_path: str, file_format: str = ".png") -> Optional[str]:
         """Extract text from a file based on its extension."""
+        logger.info("extracting "+ file_path)
         try:
-            extension = os.path.splitext(file_path)[1].lower()
+            extension = file_format
             text = ""
 
             if extension in ['.png', '.jpg', '.jpeg']:
                 text = self._smoldocling_extract(file_path)
-
             elif extension == '.pdf':
                 doc = fitz.open(file_path)
                 for page_num in range(len(doc)):

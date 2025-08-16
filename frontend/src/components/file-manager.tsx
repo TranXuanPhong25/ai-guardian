@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
 import { Upload, Download, Trash2, Eye, File, ImageIcon, FileText, Music, Video, Archive } from "lucide-react"
-
+import Image from "next/image"
 interface FileItem {
    id: string
    name: string
@@ -127,7 +127,7 @@ export function FileManager() {
    const renderPreview = (file: FileItem) => {
       if (file.type.startsWith("image/")) {
          return (
-            <img
+            <Image
                src={file.url || "/placeholder.svg"}
                alt={file.name}
                className="max-w-full max-h-96 object-contain rounded-lg"
