@@ -4,11 +4,12 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState,
   ReactNode,
 } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { useUser, useAuthSession, useLogout } from '@/hooks/useQueries';
 
 type User = {
   email: string;
@@ -24,55 +25,50 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
+  const queryClient = useQueryClient();
   const router = useRouter();
+  
+  const { data: user, isLoading: userLoading } = useUser();
+  const { data: session, isLoading: sessionLoading } = useAuthSession();
+  const { mutateAsync: logoutMutation } = useLogout();
 
+  // Listen for auth state changes
   useEffect(() => {
     const supabase = createClient();
 
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data.user && data.user.email) {
-        setUser({ email: data.user.email });
-      }
-      setLoading(false);
-    };
-
-    fetchUser();
-
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (session?.user) {
-          setUser({ email: session.user.email || '' });
+        if (event === 'SIGNED_OUT') {
+          queryClient.clear();
         } else {
-          setUser(null);
+          // Refetch user and session data
+          queryClient.invalidateQueries({ queryKey: ['user'] });
+          queryClient.invalidateQueries({ queryKey: ['auth-session'] });
         }
-        setLoading(false);
       }
     );
 
     return () => {
       authListener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [queryClient]);
 
   const logout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
+    await logoutMutation();
     router.push('/');
   };
 
   const getToken = async () => {
-    const supabase = createClient();
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token || null;
+    return session?.access_token || null;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, getToken }}>
+    <AuthContext.Provider value={{ 
+      user: user || null,
+      loading: userLoading || sessionLoading,
+      logout,
+      getToken
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,4 @@
 # Python
-pyproject.toml
 *.pyc
 *.pyo
 *.pyd
