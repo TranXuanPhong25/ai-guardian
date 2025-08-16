@@ -1,0 +1,245 @@
+{
+  "timestamp": "2025-08-16T17:47:20.925938",
+  "detection_analysis": {
+    "total_records_processed": 50,
+    "total_entities_detected": 208,
+    "avg_entities_per_record": 4.16,
+    "sample_results": [
+      {
+        "record_id": 0,
+        "original_text": "InvoiceNo: 536365 | StockCode: P1554 | Description: PRESENT | Quantity: 40 | InvoiceDate: 2024-08-17 04:34:41 | UnitPrice: 28.11 | CustomerID: 93333 | Country: India",
+        "entities_found": 4,
+        "entities": [
+          {
+            "type": "DATE_TIME",
+            "text": "2024-08-17",
+            "score": 0.95,
+            "start": 90,
+            "end": 100
+          },
+          {
+            "type": "LOCATION",
+            "text": "India",
+            "score": 0.85,
+            "start": 160,
+            "end": 165
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "P1554",
+            "score": 0.3,
+            "start": 31,
+            "end": 36
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "536365",
+            "score": 0.01,
+            "start": 11,
+            "end": 17
+          }
+        ]
+      },
+      {
+        "record_id": 1,
+        "original_text": "InvoiceNo: 536366 | StockCode: P4619 | Description: LIKE | Quantity: 47 | InvoiceDate: 2024-09-30 14:50:12 | UnitPrice: 66.04 | CustomerID: 95412 | Country: Malta",
+        "entities_found": 4,
+        "entities": [
+          {
+            "type": "DATE_TIME",
+            "text": "2024-09-30",
+            "score": 0.95,
+            "start": 87,
+            "end": 97
+          },
+          {
+            "type": "LOCATION",
+            "text": "Malta",
+            "score": 0.85,
+            "start": 157,
+            "end": 162
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "P4619",
+            "score": 0.3,
+            "start": 31,
+            "end": 36
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "536366",
+            "score": 0.01,
+            "start": 11,
+            "end": 17
+          }
+        ]
+      },
+      {
+        "record_id": 2,
+        "original_text": "InvoiceNo: 536367 | StockCode: P6445 | Description: ITEM | Quantity: 6 | InvoiceDate: 2025-01-17 15:45:07 | UnitPrice: 81.31 | CustomerID: 26525 | Country: Oman",
+        "entities_found": 4,
+        "entities": [
+          {
+            "type": "DATE_TIME",
+            "text": "2025-01-17",
+            "score": 0.95,
+            "start": 86,
+            "end": 96
+          },
+          {
+            "type": "LOCATION",
+            "text": "Oman",
+            "score": 0.85,
+            "start": 156,
+            "end": 160
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "P6445",
+            "score": 0.3,
+            "start": 31,
+            "end": 36
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "536367",
+            "score": 0.01,
+            "start": 11,
+            "end": 17
+          }
+        ]
+      },
+      {
+        "record_id": 3,
+        "original_text": "InvoiceNo: 536368 | StockCode: P2961 | Description: LIKE | Quantity: 49 | InvoiceDate: 2025-04-22 13:43:52 | UnitPrice: 81.71 | CustomerID: 97898 | Country: Albania",
+        "entities_found": 4,
+        "entities": [
+          {
+            "type": "DATE_TIME",
+            "text": "2025-04-22",
+            "score": 0.95,
+            "start": 87,
+            "end": 97
+          },
+          {
+            "type": "LOCATION",
+            "text": "Albania",
+            "score": 0.85,
+            "start": 157,
+            "end": 164
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "P2961",
+            "score": 0.3,
+            "start": 31,
+            "end": 36
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "536368",
+            "score": 0.01,
+            "start": 11,
+            "end": 17
+          }
+        ]
+      },
+      {
+        "record_id": 4,
+        "original_text": "InvoiceNo: 536369 | StockCode: P6953 | Description: PRESENT | Quantity: 21 | InvoiceDate: 2025-04-20 17:55:23 | UnitPrice: 45.05 | CustomerID: 11937 | Country: Northern Mariana Islands",
+        "entities_found": 4,
+        "entities": [
+          {
+            "type": "DATE_TIME",
+            "text": "2025-04-20",
+            "score": 0.95,
+            "start": 90,
+            "end": 100
+          },
+          {
+            "type": "LOCATION",
+            "text": "Northern Mariana Islands",
+            "score": 0.85,
+            "start": 160,
+            "end": 184
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "P6953",
+            "score": 0.3,
+            "start": 31,
+            "end": 36
+          },
+          {
+            "type": "US_DRIVER_LICENSE",
+            "text": "536369",
+            "score": 0.01,
+            "start": 11,
+            "end": 17
+          }
+        ]
+      }
+    ]
+  },
+  "masking_analysis": {
+    "total_processed": 20,
+    "successful_masks": 20,
+    "successful_unmasks": 0,
+    "masking_success_rate": 1.0,
+    "unmasking_success_rate": 0.0,
+    "overall_success_rate": 0.0,
+    "sample_results": [
+      {
+        "record_id": 0,
+        "original_text": "InvoiceNo: 536365 | StockCode: P1554 | Description: PRESENT | Quantity: 40 | InvoiceDate: 2024-08-17 04:34:41 | UnitPrice: 28.11 | CustomerID: 93333 | Country: India",
+        "masked_text": "InvoiceNo: PII_D6B9F8 | StockCode: PII_D6B9F8 | Description: PRESENT | Quantity: 40 | InvoiceDate: Date_8D790E 04:34:41 | UnitPrice: 28.11 | CustomerID: 93333 | Country: LOCATION_7E231B",
+        "unmasked_text": "InvoiceNo: 536365 | StockCode: 536365 | Description: PRESENT | Quantity: 40 | InvoiceDate: 2024-08-17 04:34:41 | UnitPrice: 28.11 | CustomerID: 93333 | Country: India",
+        "entities_found": 4,
+        "masking_successful": true,
+        "unmasking_successful": false,
+        "mappings_count": 4
+      },
+      {
+        "record_id": 1,
+        "original_text": "InvoiceNo: 536366 | StockCode: P4619 | Description: LIKE | Quantity: 47 | InvoiceDate: 2024-09-30 14:50:12 | UnitPrice: 66.04 | CustomerID: 95412 | Country: Malta",
+        "masked_text": "InvoiceNo: PII_8ADD18 | StockCode: PII_8ADD18 | Description: LIKE | Quantity: 47 | InvoiceDate: Date_FE0F5C 14:50:12 | UnitPrice: 66.04 | CustomerID: 95412 | Country: LOCATION_FCF195",
+        "unmasked_text": "InvoiceNo: 536366 | StockCode: 536366 | Description: LIKE | Quantity: 47 | InvoiceDate: 2024-09-30 14:50:12 | UnitPrice: 66.04 | CustomerID: 95412 | Country: Malta",
+        "entities_found": 4,
+        "masking_successful": true,
+        "unmasking_successful": false,
+        "mappings_count": 4
+      },
+      {
+        "record_id": 2,
+        "original_text": "InvoiceNo: 536367 | StockCode: P6445 | Description: ITEM | Quantity: 6 | InvoiceDate: 2025-01-17 15:45:07 | UnitPrice: 81.31 | CustomerID: 26525 | Country: Oman",
+        "masked_text": "InvoiceNo: PII_CCB157 | StockCode: PII_CCB157 | Description: ITEM | Quantity: 6 | InvoiceDate: Date_46381A 15:45:07 | UnitPrice: 81.31 | CustomerID: 26525 | Country: LOCATION_638F52",
+        "unmasked_text": "InvoiceNo: 536367 | StockCode: 536367 | Description: ITEM | Quantity: 6 | InvoiceDate: 2025-01-17 15:45:07 | UnitPrice: 81.31 | CustomerID: 26525 | Country: Oman",
+        "entities_found": 4,
+        "masking_successful": true,
+        "unmasking_successful": false,
+        "mappings_count": 4
+      },
+      {
+        "record_id": 3,
+        "original_text": "InvoiceNo: 536368 | StockCode: P2961 | Description: LIKE | Quantity: 49 | InvoiceDate: 2025-04-22 13:43:52 | UnitPrice: 81.71 | CustomerID: 97898 | Country: Albania",
+        "masked_text": "InvoiceNo: PII_2DE074 | StockCode: PII_2DE074 | Description: LIKE | Quantity: 49 | InvoiceDate: Date_52EC0F 13:43:52 | UnitPrice: 81.71 | CustomerID: 97898 | Country: LOCATION_76A2FE",
+        "unmasked_text": "InvoiceNo: 536368 | StockCode: 536368 | Description: LIKE | Quantity: 49 | InvoiceDate: 2025-04-22 13:43:52 | UnitPrice: 81.71 | CustomerID: 97898 | Country: Albania",
+        "entities_found": 4,
+        "masking_successful": true,
+        "unmasking_successful": false,
+        "mappings_count": 4
+      },
+      {
+        "record_id": 4,
+        "original_text": "InvoiceNo: 536369 | StockCode: P6953 | Description: PRESENT | Quantity: 21 | InvoiceDate: 2025-04-20 17:55:23 | UnitPrice: 45.05 | CustomerID: 11937 | Country: Northern Mariana Islands",
+        "masked_text": "InvoiceNo: PII_CE393F | StockCode: PII_CE393F | Description: PRESENT | Quantity: 21 | InvoiceDate: Date_2BD23A 17:55:23 | UnitPrice: 45.05 | CustomerID: 11937 | Country: LOCATION_1312A0",
+        "unmasked_text": "InvoiceNo: 536369 | StockCode: 536369 | Description: PRESENT | Quantity: 21 | InvoiceDate: 2025-04-20 17:55:23 | UnitPrice: 45.05 | CustomerID: 11937 | Country: Northern Mariana Islands",
+        "entities_found": 4,
+        "masking_successful": true,
+        "unmasking_successful": false,
+        "mappings_count": 4
+      }
+    ]
+  }
+}
