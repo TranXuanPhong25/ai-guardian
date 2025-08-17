@@ -1,0 +1,266 @@
+{
+  "records": [
+    {
+      "InvoiceNo": "536365",
+      "StockCode": "P2926",
+      "Description": "ITEM",
+      "Quantity": 22,
+      "InvoiceDate": "2025-03-02 03:17:22",
+      "UnitPrice": 60.47,
+      "CustomerID": 94660,
+      "Country": "Georgia",
+      "CustomerName": "Vi Lê",
+      "CustomerEmail": "janetran@example.net"
+    },
+    {
+      "InvoiceNo": "536366",
+      "StockCode": "P5613",
+      "Description": "LIKE",
+      "Quantity": 17,
+      "InvoiceDate": "2025-05-18 16:40:45",
+      "UnitPrice": 63.15,
+      "CustomerID": 64136,
+      "Country": "Central African Republic",
+      "CustomerName": "Olivia Morrison",
+      "CustomerEmail": "john18@example.com",
+      "SSN": "078-38-0590"
+    },
+    {
+      "InvoiceNo": "536367",
+      "StockCode": "P4586",
+      "Description": "ITEM",
+      "Quantity": 48,
+      "InvoiceDate": "2025-03-12 20:19:16",
+      "UnitPrice": 47.48,
+      "CustomerID": 30573,
+      "Country": "South Korea",
+      "CustomerName": "Eduardo Davis",
+      "CustomerPhone": "(00)643-7941",
+      "CreditCard": "30266896536308"
+    },
+    {
+      "InvoiceNo": "536368",
+      "StockCode": "P3658",
+      "Description": "LIKE",
+      "Quantity": 7,
+      "InvoiceDate": "2024-09-05 20:37:26",
+      "UnitPrice": 49.86,
+      "CustomerID": 44268,
+      "Country": "North Macedonia",
+      "CustomerName": "Linh Mai",
+      "CustomerEmail": "john51@example.net",
+      "CreditCard": "4490260369066799",
+      "SSN": "273-72-6998"
+    },
+    {
+      "InvoiceNo": "536369",
+      "StockCode": "P3482",
+      "Description": "ITEM",
+      "Quantity": 8,
+      "InvoiceDate": "2025-05-20 15:34:39",
+      "UnitPrice": 70.65,
+      "CustomerID": 49721,
+      "Country": "Mexico",
+      "CustomerName": "Ngọc Lê",
+      "CustomerEmail": "zturner@example.com"
+    },
+    {
+      "InvoiceNo": "536370",
+      "StockCode": "P2705",
+      "Description": "GIFT",
+      "Quantity": 22,
+      "InvoiceDate": "2025-03-12 16:47:48",
+      "UnitPrice": 2.28,
+      "CustomerID": 53420,
+      "Country": "Costa Rica",
+      "CustomerPhone": "+84-02-308 7110"
+    },
+    {
+      "InvoiceNo": "536371",
+      "StockCode": "P2940",
+      "Description": "PRESENT",
+      "Quantity": 42,
+      "InvoiceDate": "2025-07-29 20:54:30",
+      "UnitPrice": 82.69,
+      "CustomerID": 35060,
+      "Country": "Belize",
+      "CustomerEmail": "mbui@example.net",
+      "CustomerPhone": "09 3465 4885",
+      "CreditCard": "213129560567885"
+    },
+    {
+      "InvoiceNo": "536372",
+      "StockCode": "P8108",
+      "Description": "ITEM",
+      "Quantity": 39,
+      "InvoiceDate": "2025-01-01 14:21:37",
+      "UnitPrice": 55.14,
+      "CustomerID": 29444,
+      "Country": "Yemen",
+      "CustomerEmail": "zhines@example.org",
+      "CustomerPhone": "(05) 0937 1766",
+      "CreditCard": "4479751518152"
+    },
+    {
+      "InvoiceNo": "536373",
+      "StockCode": "P8040",
+      "Description": "PRESENT",
+      "Quantity": 44,
+      "InvoiceDate": "2025-05-25 23:31:07",
+      "UnitPrice": 82.99,
+      "CustomerID": 92184,
+      "Country": "Seychelles",
+      "CustomerName": "Christine Mcguire",
+      "CustomerPhone": "001-807-651-9661",
+      "CreditCard": "676211636888",
+      "SSN": "323-15-0279"
+    },
+    {
+      "InvoiceNo": "536374",
+      "StockCode": "P4562",
+      "Description": "ITEM",
+      "Quantity": 23,
+      "InvoiceDate": "2024-12-03 07:23:27",
+      "UnitPrice": 53.24,
+      "CustomerID": 70954,
+      "Country": "Brunei Darussalam",
+      "CustomerName": "Brady Patterson",
+      "CustomerEmail": "wvu@example.net",
+      "CustomerPhone": "+84-92-898 3833"
+    }
+  ],
+  "ground_truth_sample": {
+    "0": [
+      [
+        "PERSON",
+        "Vi Lê"
+      ],
+      [
+        "EMAIL_ADDRESS",
+        "janetran@example.net"
+      ]
+    ],
+    "1": [
+      [
+        "PERSON",
+        "Olivia Morrison"
+      ],
+      [
+        "EMAIL_ADDRESS",
+        "john18@example.com"
+      ],
+      [
+        "US_SSN",
+        "078-38-0590"
+      ]
+    ],
+    "2": [
+      [
+        "PERSON",
+        "Eduardo Davis"
+      ],
+      [
+        "PHONE_NUMBER",
+        "(00)643-7941"
+      ],
+      [
+        "CREDIT_CARD",
+        "30266896536308"
+      ]
+    ],
+    "3": [
+      [
+        "PERSON",
+        "Linh Mai"
+      ],
+      [
+        "EMAIL_ADDRESS",
+        "john51@example.net"
+      ],
+      [
+        "CREDIT_CARD",
+        "4490260369066799"
+      ],
+      [
+        "US_SSN",
+        "273-72-6998"
+      ]
+    ],
+    "4": [
+      [
+        "PERSON",
+        "Ngọc Lê"
+      ],
+      [
+        "EMAIL_ADDRESS",
+        "zturner@example.com"
+      ]
+    ],
+    "5": [
+      [
+        "PHONE_NUMBER",
+        "+84-02-308 7110"
+      ]
+    ],
+    "6": [
+      [
+        "EMAIL_ADDRESS",
+        "mbui@example.net"
+      ],
+      [
+        "PHONE_NUMBER",
+        "09 3465 4885"
+      ],
+      [
+        "CREDIT_CARD",
+        "213129560567885"
+      ]
+    ],
+    "7": [
+      [
+        "EMAIL_ADDRESS",
+        "zhines@example.org"
+      ],
+      [
+        "PHONE_NUMBER",
+        "(05) 0937 1766"
+      ],
+      [
+        "CREDIT_CARD",
+        "4479751518152"
+      ]
+    ],
+    "8": [
+      [
+        "PERSON",
+        "Christine Mcguire"
+      ],
+      [
+        "PHONE_NUMBER",
+        "001-807-651-9661"
+      ],
+      [
+        "CREDIT_CARD",
+        "676211636888"
+      ],
+      [
+        "US_SSN",
+        "323-15-0279"
+      ]
+    ],
+    "9": [
+      [
+        "PERSON",
+        "Brady Patterson"
+      ],
+      [
+        "EMAIL_ADDRESS",
+        "wvu@example.net"
+      ],
+      [
+        "PHONE_NUMBER",
+        "+84-92-898 3833"
+      ]
+    ]
+  }
+}
