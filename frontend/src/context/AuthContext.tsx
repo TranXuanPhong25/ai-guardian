@@ -13,6 +13,7 @@ import { useUser, useAuthSession, useLogout } from '@/hooks/useQueries';
 
 type User = {
   email: string;
+  id: string;
 };
 
 type AuthContextType = {

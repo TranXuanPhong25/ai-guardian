@@ -6,6 +6,7 @@ import { getAllChatSessions } from '@/utils/api';
 import { IChatSession } from '@/types/chat.interface';
 import { maskingService } from '@/services/maskingService';
 import { fileService } from '@/services/fileService';
+import { useState, useEffect, useCallback } from 'react';
 
 // Auth queries
 export const useUser = () => {
@@ -52,14 +53,27 @@ export const useChatSessions = () => {
 };
 
 // Masking queries
-export const useSensitiveValidation = (content: string, enabled = true) => {
+export const useSensitiveValidation = (content: string, enabled = true, debounceMs = 500) => {
+  const [debouncedContent, setDebouncedContent] = useState(content);
+
+  // Debounce the content
+  useEffect(() => {
+    if (!enabled) return;
+    
+    const timer = setTimeout(() => {
+      setDebouncedContent(content);
+    }, debounceMs);
+
+    return () => clearTimeout(timer);
+  }, [content, enabled, debounceMs]);
+
   return useQuery({
-    queryKey: ['sensitive-validation', content],
+    queryKey: ['sensitive-validation', debouncedContent],
     queryFn: async () => {
-      if (!content?.trim()) return { alert: null };
-      return maskingService.validateSensitive(content);
+      if (!debouncedContent?.trim()) return { alert: null };
+      return maskingService.validateSensitive(debouncedContent);
     },
-    enabled: enabled && !!content?.trim(),
+    enabled: enabled && !!debouncedContent?.trim(),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     retry: 1,
   });

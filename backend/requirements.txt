@@ -49,4 +49,10 @@ requests
 httpx
 pytest
 pytest-asyncio
+email-validator
+supabase
+python-multipart
+langchain_google_genai
 
+
+weaviate-client

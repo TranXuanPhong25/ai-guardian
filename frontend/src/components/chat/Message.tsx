@@ -2,15 +2,16 @@ import { useCopyToClipboard } from './hooks/useCopyToClipboard';
 import { Check, Copy, Eye, EyeOff } from 'lucide-react';
 import ChatAvatar from './Avatar';
 import Markdown from './Markdown';
+import FilePreviewInMessage from './FilePreviewInMessage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Message } from 'ai';
+import { MessageWithFiles } from '@/types/chat.interface';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useSensitiveValidation, useMaskingOperations } from '@/hooks/useQueries';
 
-export default function ChatMessage({ chatMessage, sessionId }: { chatMessage: Message; sessionId?: string }) {
+export default function ChatMessage({ chatMessage, sessionId }: { chatMessage: MessageWithFiles; sessionId?: string }) {
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 });
   const [isMasked, setIsMasked] = useState(false);
   const [maskedContent, setMaskedContent] = useState('');
@@ -63,6 +64,11 @@ export default function ChatMessage({ chatMessage, sessionId }: { chatMessage: M
         <ChatAvatar role={chatMessage.role} />
         <div className="flex-1 pt-1 break-words overflow-hidden">
           <Markdown content={displayContent} role={chatMessage.role} />
+          
+          {/* Show attached files if any */}
+          {chatMessage.attached_files && chatMessage.attached_files.length > 0 && (
+            <FilePreviewInMessage files={chatMessage.attached_files} />
+          )}
         </div>
         <div className="flex items-center gap-1 mt-1">
           {/* Copy button */}

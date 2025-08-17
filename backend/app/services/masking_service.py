@@ -98,7 +98,25 @@ class PIIMaskerService:
             "DATE_TIME": f"Date_{hash_val}",
             "CREDIT_CARD": f"CC_{hash_val}",
             "ADDRESS": f"Address_{hash_val}",
-            "DEFAULT": f"PII_{hash_val}"
+            "DEFAULT": f"PII_{hash_val}",
+            "LOC": f"LOCATION_{hash_val}",
+            "LOCATION": f"LOCATION_{hash_val}",
+            "GPE": f"LOCATION_{hash_val}",
+            "ORG": f"ORGANIZATION_{hash_val}",
+            "ORGANIZATION": f"ORGANIZATION_{hash_val}",
+            "NORP": f"NRP_{hash_val}",
+            "AGE": f"AGE_{hash_val}",
+            "ID": f"ID_{hash_val}",
+            "PATIENT": f"PERSON_{hash_val}",
+            "STAFF": f"PERSON_{hash_val}",
+            "HOSP": f"ORGANIZATION_{hash_val}",
+            "PATORG": f"ORGANIZATION_{hash_val}",
+            "DATE": f"DATE_TIME_{hash_val}",
+            "TIME": f"DATE_TIME_{hash_val}",
+            "HCW": f"PERSON_{hash_val}",
+            "HOSPITAL": f"ORGANIZATION_{hash_val}",
+            "FACILITY": f"LOCATION_{hash_val}",
+            "VENDOR": f"ORGANIZATION_{hash_val}"
         }
         pseudonym = pseudonym_map.get(entity_type, pseudonym_map["DEFAULT"])
         return await self.save_pii_mapping(entity_type, value, pseudonym)
