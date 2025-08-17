@@ -1,0 +1,65 @@
+{
+  "test_config": {
+    "cases_per_entity": 10000,
+    "batch_size": 100,
+    "timestamp": "2025-08-17T13:18:29.210124",
+    "total_cases": 50000,
+    "detection_only": true
+  },
+  "entity_results": {
+    "PERSON": {
+      "total_cases": 10000,
+      "detected": 9633,
+      "detection_rate": 96.33,
+      "error_rate": 0.0,
+      "processing_time": 29.117165327072144,
+      "throughput": 343.44002541697773,
+      "errors": 0
+    },
+    "EMAIL_ADDRESS": {
+      "total_cases": 10000,
+      "detected": 10000,
+      "detection_rate": 100.0,
+      "error_rate": 0.0,
+      "processing_time": 28.6876859664917,
+      "throughput": 348.58161831806086,
+      "errors": 0
+    },
+    "PHONE_NUMBER": {
+      "total_cases": 10000,
+      "detected": 7723,
+      "detection_rate": 77.23,
+      "error_rate": 0.0,
+      "processing_time": 36.837798833847046,
+      "throughput": 271.4603020963313,
+      "errors": 0
+    },
+    "US_SSN": {
+      "total_cases": 10000,
+      "detected": 10000,
+      "detection_rate": 100.0,
+      "error_rate": 0.0,
+      "processing_time": 35.295796155929565,
+      "throughput": 283.31985927791675,
+      "errors": 0
+    },
+    "CREDIT_CARD": {
+      "total_cases": 10000,
+      "detected": 10000,
+      "detection_rate": 100.0,
+      "error_rate": 0.0,
+      "processing_time": 30.686742067337036,
+      "throughput": 325.87362901075113,
+      "errors": 0
+    }
+  },
+  "overall_stats": {
+    "total_cases": 50000,
+    "total_detected": 47356,
+    "total_errors": 0,
+    "overall_detection_rate": 94.71199999999999,
+    "overall_error_rate": 0.0,
+    "total_processing_time": 160.6253809928894,
+    "overall_throughput": 311.2833083472245
+  }
+}

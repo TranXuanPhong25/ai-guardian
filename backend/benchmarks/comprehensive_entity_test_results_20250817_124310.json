@@ -1,0 +1,144 @@
+{
+  "timestamp": "2025-08-17T12:43:10.550979",
+  "test_summary": {
+    "total_entities_tested": 3,
+    "total_test_cases": 9,
+    "overall_detection_rate": 0.7777777777777778,
+    "overall_masking_rate": 0.7777777777777778,
+    "overall_pattern_match_rate": 0.7777777777777778
+  },
+  "detailed_results": [
+    {
+      "entity_type": "PERSON",
+      "expected_pattern": "Name_",
+      "test_cases": [
+        {
+          "original_text": "Customer: Quý cô Bảo Bùi",
+          "detected": true,
+          "masked_successfully": true,
+          "pattern_matches": true,
+          "masked_text": "Customer: Name_738EC6",
+          "mapping": {
+            "Name_738EC6": "Quý cô Bảo Bùi"
+          },
+          "error": null
+        },
+        {
+          "original_text": "Patient Name: Christine Johnson",
+          "detected": true,
+          "masked_successfully": true,
+          "pattern_matches": true,
+          "masked_text": "Patient Name: Name_ADE0BD",
+          "mapping": {
+            "Name_ADE0BD": "Christine Johnson"
+          },
+          "error": null
+        },
+        {
+          "original_text": "Dr. Sheri Graham",
+          "detected": true,
+          "masked_successfully": true,
+          "pattern_matches": true,
+          "masked_text": "Dr. Name_0690D6",
+          "mapping": {
+            "Name_0690D6": "Sheri Graham"
+          },
+          "error": null
+        }
+      ],
+      "success_count": 3,
+      "total_count": 3,
+      "detection_rate": 1.0,
+      "masking_rate": 1.0,
+      "pattern_match_rate": 1.0
+    },
+    {
+      "entity_type": "EMAIL_ADDRESS",
+      "expected_pattern": "Email_",
+      "test_cases": [
+        {
+          "original_text": "Email: kduong@example.com",
+          "detected": true,
+          "masked_successfully": true,
+          "pattern_matches": true,
+          "masked_text": "Name_56218C: Email_90DF71@example.com",
+          "mapping": {
+            "Email_90DF71@example.com": "kduong@example.com",
+            "Name_56218C": "Email",
+            "PII_B0558D": "example.com"
+          },
+          "error": null
+        },
+        {
+          "original_text": "Contact email: youngmeredith@steele-stevenson.com",
+          "detected": true,
+          "masked_successfully": true,
+          "pattern_matches": true,
+          "masked_text": "Contact email: Email_8D4384@example.com",
+          "mapping": {
+            "Email_8D4384@example.com": "youngmeredith@steele-stevenson.com",
+            "PII_BF441D": "steele-stevenson.com"
+          },
+          "error": null
+        },
+        {
+          "original_text": "Send to: schwartztara@example.net",
+          "detected": true,
+          "masked_successfully": true,
+          "pattern_matches": true,
+          "masked_text": "Send to: Email_AE6CA9@example.com",
+          "mapping": {
+            "Email_AE6CA9@example.com": "schwartztara@example.net",
+            "PII_A1692E": "example.net"
+          },
+          "error": null
+        }
+      ],
+      "success_count": 3,
+      "total_count": 3,
+      "detection_rate": 1.0,
+      "masking_rate": 1.0,
+      "pattern_match_rate": 1.0
+    },
+    {
+      "entity_type": "PHONE_NUMBER",
+      "expected_pattern": "Phone_",
+      "test_cases": [
+        {
+          "original_text": "Phone: +1-891-762-5151x61078",
+          "detected": false,
+          "masked_successfully": false,
+          "pattern_matches": false,
+          "masked_text": "Phone: +1-891-762-5151x61078",
+          "mapping": {},
+          "error": null
+        },
+        {
+          "original_text": "Contact: +1-555-995-9254",
+          "detected": false,
+          "masked_successfully": false,
+          "pattern_matches": false,
+          "masked_text": "Contact: +1-555-995-9254",
+          "mapping": {},
+          "error": null
+        },
+        {
+          "original_text": "Mobile: (555) 851-9765",
+          "detected": true,
+          "masked_successfully": true,
+          "pattern_matches": true,
+          "masked_text": "Mobile: Phone_E54291",
+          "mapping": {
+            "Phone_E54291": "(555) 851-9765"
+          },
+          "error": null
+        }
+      ],
+      "success_count": 1,
+      "total_count": 3,
+      "detection_rate": 0.3333333333333333,
+      "masking_rate": 0.3333333333333333,
+      "pattern_match_rate": 0.3333333333333333
+    }
+  ]
+}

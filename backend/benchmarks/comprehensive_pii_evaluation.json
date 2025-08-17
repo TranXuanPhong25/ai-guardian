@@ -1,0 +1,919 @@
+{
+  "evaluation_type": "Accurate PII Evaluation with Ground Truth",
+  "timestamp": "2025-08-17T13:03:20.746350",
+  "detection_accuracy": {
+    "precision": 0.9494071146245059,
+    "recall": 0.8294198895027625,
+    "f1_score": 0.8853667526723185,
+    "total_true_positives": 1201,
+    "total_false_positives": 64,
+    "total_false_negatives": 247
+  },
+  "masking_accuracy": {
+    "masking_success_rate": 1.0,
+    "roundtrip_success_rate": 0.0,
+    "total_processed": 100,
+    "successful_masks": 100,
+    "perfect_roundtrips": 0
+  },
+  "detailed_detection_samples": [
+    {
+      "record_id": 0,
+      "text": "InvoiceNo: 536365 | StockCode: P2854 | Description: LIKE | Quantity: 50 | InvoiceDate: 2025-02-27 06:53:45 | UnitPrice: 16.51 | CustomerID: 28580 | Co...",
+      "ground_truth_count": 4,
+      "raw_detected_count": 9,
+      "filtered_detected_count": 3,
+      "raw_accuracy": {
+        "true_positives": 3,
+        "false_positives": 6,
+        "false_negatives": 1,
+        "precision": 0.3333333333333333,
+        "recall": 0.75,
+        "f1_score": 0.46153846153846156,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Quang Nguyễn"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(06) 6053 9804"
+          ],
+          [
+            "US_SSN",
+            "106-06-2552"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnmai@example.com"
+          ]
+        ],
+        "detected": [
+          [
+            "DATE_TIME",
+            "06:53:45"
+          ],
+          [
+            "DATE_TIME",
+            "2025-02-27"
+          ],
+          [
+            "US_SSN",
+            "106-06-2552"
+          ],
+          [
+            "NRP",
+            "Comoros"
+          ],
+          [
+            "PERSON",
+            "Quang Nguyễn"
+          ],
+          [
+            "URL",
+            "example.com"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P2854"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536365"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnmai@example.com"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Quang Nguyễn"
+          ],
+          [
+            "US_SSN",
+            "106-06-2552"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnmai@example.com"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "DATE_TIME",
+            "06:53:45"
+          ],
+          [
+            "DATE_TIME",
+            "2025-02-27"
+          ],
+          [
+            "NRP",
+            "Comoros"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P2854"
+          ],
+          [
+            "URL",
+            "example.com"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536365"
+          ]
+        ],
+        "missed_entities": [
+          [
+            "PHONE_NUMBER",
+            "(06) 6053 9804"
+          ]
+        ]
+      },
+      "filtered_accuracy": {
+        "true_positives": 3,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "precision": 1.0,
+        "recall": 0.75,
+        "f1_score": 0.8571428571428571,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Quang Nguyễn"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(06) 6053 9804"
+          ],
+          [
+            "US_SSN",
+            "106-06-2552"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnmai@example.com"
+          ]
+        ],
+        "detected": [
+          [
+            "PERSON",
+            "Quang Nguyễn"
+          ],
+          [
+            "US_SSN",
+            "106-06-2552"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnmai@example.com"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Quang Nguyễn"
+          ],
+          [
+            "US_SSN",
+            "106-06-2552"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnmai@example.com"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": [
+          [
+            "PHONE_NUMBER",
+            "(06) 6053 9804"
+          ]
+        ]
+      }
+    },
+    {
+      "record_id": 1,
+      "text": "InvoiceNo: 536366 | StockCode: P1155 | Description: ITEM | Quantity: 28 | InvoiceDate: 2024-10-01 23:08:33 | UnitPrice: 62.51 | CustomerID: 70257 | Co...",
+      "ground_truth_count": 3,
+      "raw_detected_count": 10,
+      "filtered_detected_count": 2,
+      "raw_accuracy": {
+        "true_positives": 2,
+        "false_positives": 8,
+        "false_negatives": 1,
+        "precision": 0.2,
+        "recall": 0.6666666666666666,
+        "f1_score": 0.30769230769230765,
+        "ground_truth": [
+          [
+            "EMAIL_ADDRESS",
+            "rhodeskayla@example.net"
+          ],
+          [
+            "PERSON",
+            "Nhiên Phú Vũ"
+          ],
+          [
+            "PHONE_NUMBER",
+            "03 5887 0704"
+          ]
+        ],
+        "detected": [
+          [
+            "US_DRIVER_LICENSE",
+            "P1155"
+          ],
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "DATE_TIME",
+            "5887"
+          ],
+          [
+            "DATE_TIME",
+            "0704"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "rhodeskayla@example.net"
+          ],
+          [
+            "LOCATION",
+            "France"
+          ],
+          [
+            "PHONE_NUMBER",
+            "03 5887 0704"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536366"
+          ],
+          [
+            "LOCATION",
+            "Nhiên Phú"
+          ],
+          [
+            "DATE_TIME",
+            "2024-10-01"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "EMAIL_ADDRESS",
+            "rhodeskayla@example.net"
+          ],
+          [
+            "PHONE_NUMBER",
+            "03 5887 0704"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "US_DRIVER_LICENSE",
+            "P1155"
+          ],
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "DATE_TIME",
+            "0704"
+          ],
+          [
+            "DATE_TIME",
+            "5887"
+          ],
+          [
+            "LOCATION",
+            "France"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536366"
+          ],
+          [
+            "DATE_TIME",
+            "2024-10-01"
+          ],
+          [
+            "LOCATION",
+            "Nhiên Phú"
+          ]
+        ],
+        "missed_entities": [
+          [
+            "PERSON",
+            "Nhiên Phú Vũ"
+          ]
+        ]
+      },
+      "filtered_accuracy": {
+        "true_positives": 2,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1_score": 0.8,
+        "ground_truth": [
+          [
+            "EMAIL_ADDRESS",
+            "rhodeskayla@example.net"
+          ],
+          [
+            "PERSON",
+            "Nhiên Phú Vũ"
+          ],
+          [
+            "PHONE_NUMBER",
+            "03 5887 0704"
+          ]
+        ],
+        "detected": [
+          [
+            "EMAIL_ADDRESS",
+            "rhodeskayla@example.net"
+          ],
+          [
+            "PHONE_NUMBER",
+            "03 5887 0704"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "EMAIL_ADDRESS",
+            "rhodeskayla@example.net"
+          ],
+          [
+            "PHONE_NUMBER",
+            "03 5887 0704"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": [
+          [
+            "PERSON",
+            "Nhiên Phú Vũ"
+          ]
+        ]
+      }
+    },
+    {
+      "record_id": 2,
+      "text": "InvoiceNo: 536367 | StockCode: P7928 | Description: GIFT | Quantity: 4 | InvoiceDate: 2025-03-23 19:26:46 | UnitPrice: 30.86 | CustomerID: 28285 | Cou...",
+      "ground_truth_count": 3,
+      "raw_detected_count": 12,
+      "filtered_detected_count": 3,
+      "raw_accuracy": {
+        "true_positives": 3,
+        "false_positives": 9,
+        "false_negatives": 0,
+        "precision": 0.25,
+        "recall": 1.0,
+        "f1_score": 0.4,
+        "ground_truth": [
+          [
+            "PHONE_NUMBER",
+            "09 4113623"
+          ],
+          [
+            "PERSON",
+            "Jessica Baker"
+          ],
+          [
+            "CREDIT_CARD",
+            "4364357239311562"
+          ]
+        ],
+        "detected": [
+          [
+            "DATE_TIME",
+            "2025-03-23"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "4364357239311562"
+          ],
+          [
+            "CREDIT_CARD",
+            "4364357239311562"
+          ],
+          [
+            "DATE_TIME",
+            "2025-03-23 19:26:46"
+          ],
+          [
+            "PHONE_NUMBER",
+            "09 4113623"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P7928"
+          ],
+          [
+            "DATE_TIME",
+            "09 4113623"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536367"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "4113623"
+          ],
+          [
+            "PERSON",
+            "Jessica Baker"
+          ],
+          [
+            "US_BANK_NUMBER",
+            "4364357239311562"
+          ],
+          [
+            "LOCATION",
+            "Tunisia"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PHONE_NUMBER",
+            "09 4113623"
+          ],
+          [
+            "PERSON",
+            "Jessica Baker"
+          ],
+          [
+            "CREDIT_CARD",
+            "4364357239311562"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "DATE_TIME",
+            "2025-03-23"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "4364357239311562"
+          ],
+          [
+            "DATE_TIME",
+            "2025-03-23 19:26:46"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P7928"
+          ],
+          [
+            "DATE_TIME",
+            "09 4113623"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536367"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "4113623"
+          ],
+          [
+            "US_BANK_NUMBER",
+            "4364357239311562"
+          ],
+          [
+            "LOCATION",
+            "Tunisia"
+          ]
+        ],
+        "missed_entities": []
+      },
+      "filtered_accuracy": {
+        "true_positives": 3,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "ground_truth": [
+          [
+            "PHONE_NUMBER",
+            "09 4113623"
+          ],
+          [
+            "PERSON",
+            "Jessica Baker"
+          ],
+          [
+            "CREDIT_CARD",
+            "4364357239311562"
+          ]
+        ],
+        "detected": [
+          [
+            "PHONE_NUMBER",
+            "09 4113623"
+          ],
+          [
+            "PERSON",
+            "Jessica Baker"
+          ],
+          [
+            "CREDIT_CARD",
+            "4364357239311562"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PHONE_NUMBER",
+            "09 4113623"
+          ],
+          [
+            "PERSON",
+            "Jessica Baker"
+          ],
+          [
+            "CREDIT_CARD",
+            "4364357239311562"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": []
+      }
+    },
+    {
+      "record_id": 3,
+      "text": "InvoiceNo: 536368 | StockCode: P5692 | Description: LIKE | Quantity: 25 | InvoiceDate: 2025-04-25 19:26:14 | UnitPrice: 5.69 | CustomerID: 60636 | Cou...",
+      "ground_truth_count": 2,
+      "raw_detected_count": 7,
+      "filtered_detected_count": 2,
+      "raw_accuracy": {
+        "true_positives": 2,
+        "false_positives": 5,
+        "false_negatives": 0,
+        "precision": 0.2857142857142857,
+        "recall": 1.0,
+        "f1_score": 0.4444444444444445,
+        "ground_truth": [
+          [
+            "EMAIL_ADDRESS",
+            "johnbui@example.net"
+          ],
+          [
+            "PERSON",
+            "Thành Bảo Mai"
+          ]
+        ],
+        "detected": [
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "PERSON",
+            "Thành Bảo Mai"
+          ],
+          [
+            "LOCATION",
+            "Saint Lucia"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536368"
+          ],
+          [
+            "DATE_TIME",
+            "2025-04-25"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P5692"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnbui@example.net"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Thành Bảo Mai"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnbui@example.net"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "LOCATION",
+            "Saint Lucia"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536368"
+          ],
+          [
+            "DATE_TIME",
+            "2025-04-25"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P5692"
+          ]
+        ],
+        "missed_entities": []
+      },
+      "filtered_accuracy": {
+        "true_positives": 2,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "ground_truth": [
+          [
+            "EMAIL_ADDRESS",
+            "johnbui@example.net"
+          ],
+          [
+            "PERSON",
+            "Thành Bảo Mai"
+          ]
+        ],
+        "detected": [
+          [
+            "PERSON",
+            "Thành Bảo Mai"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "johnbui@example.net"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "EMAIL_ADDRESS",
+            "johnbui@example.net"
+          ],
+          [
+            "PERSON",
+            "Thành Bảo Mai"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": []
+      }
+    },
+    {
+      "record_id": 4,
+      "text": "InvoiceNo: 536369 | StockCode: P9015 | Description: GIFT | Quantity: 22 | InvoiceDate: 2025-06-06 12:18:08 | UnitPrice: 8.93 | CustomerID: 41085 | Cou...",
+      "ground_truth_count": 4,
+      "raw_detected_count": 9,
+      "filtered_detected_count": 4,
+      "raw_accuracy": {
+        "true_positives": 4,
+        "false_positives": 5,
+        "false_negatives": 0,
+        "precision": 0.4444444444444444,
+        "recall": 1.0,
+        "f1_score": 0.6153846153846153,
+        "ground_truth": [
+          [
+            "US_SSN",
+            "880-36-3551"
+          ],
+          [
+            "PERSON",
+            "Katelyn Jones"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(09)794-4630"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "matthewhernandez@example.net"
+          ]
+        ],
+        "detected": [
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "US_SSN",
+            "880-36-3551"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536369"
+          ],
+          [
+            "DATE_TIME",
+            "2025-06-06"
+          ],
+          [
+            "PERSON",
+            "Katelyn Jones"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P9015"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(09)794-4630"
+          ],
+          [
+            "LOCATION",
+            "Monaco"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "matthewhernandez@example.net"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PHONE_NUMBER",
+            "(09)794-4630"
+          ],
+          [
+            "US_SSN",
+            "880-36-3551"
+          ],
+          [
+            "PERSON",
+            "Katelyn Jones"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "matthewhernandez@example.net"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536369"
+          ],
+          [
+            "DATE_TIME",
+            "2025-06-06"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P9015"
+          ],
+          [
+            "LOCATION",
+            "Monaco"
+          ]
+        ],
+        "missed_entities": []
+      },
+      "filtered_accuracy": {
+        "true_positives": 4,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "ground_truth": [
+          [
+            "US_SSN",
+            "880-36-3551"
+          ],
+          [
+            "PERSON",
+            "Katelyn Jones"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(09)794-4630"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "matthewhernandez@example.net"
+          ]
+        ],
+        "detected": [
+          [
+            "US_SSN",
+            "880-36-3551"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(09)794-4630"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "matthewhernandez@example.net"
+          ],
+          [
+            "PERSON",
+            "Katelyn Jones"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Katelyn Jones"
+          ],
+          [
+            "US_SSN",
+            "880-36-3551"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(09)794-4630"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "matthewhernandez@example.net"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": []
+      }
+    }
+  ],
+  "detailed_masking_samples": [
+    {
+      "record_id": 0,
+      "original_length": 281,
+      "masked_length": 291,
+      "entities_masked": 9,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.1387900355871886,
+      "sample_original": "InvoiceNo: 536365 | StockCode: P2854 | Description: LIKE | Quantity: 50 | InvoiceDate: 2025-02-27 06...",
+      "sample_masked": "InvoiceNo: PII_D6B9F8 | StockCode: PII_D6B9F8 | Description: LIKE | Quantity: 50 | InvoiceDate: Date...",
+      "sample_unmasked": "InvoiceNo: 536365 | StockCode: 536365 | Description: LIKE | Quantity: 50 | InvoiceDate: 06:53:45 | U..."
+    },
+    {
+      "record_id": 1,
+      "original_length": 263,
+      "masked_length": 289,
+      "entities_masked": 10,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.14068441064638784,
+      "sample_original": "InvoiceNo: 536366 | StockCode: P1155 | Description: ITEM | Quantity: 28 | InvoiceDate: 2024-10-01 23...",
+      "sample_masked": "InvoiceNo: PII_8ADD18 | StockCode: PII_8ADD18 | Description: ITEM | Quantity: 28 | InvoiceDate: Date...",
+      "sample_unmasked": "InvoiceNo: 536366 | StockCode: 536366 | Description: ITEM | Quantity: 28 | InvoiceDate: 0704 23:08:3..."
+    },
+    {
+      "record_id": 2,
+      "original_length": 252,
+      "masked_length": 253,
+      "entities_masked": 11,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.06439393939393939,
+      "sample_original": "InvoiceNo: 536367 | StockCode: P7928 | Description: GIFT | Quantity: 4 | InvoiceDate: 2025-03-23 19:...",
+      "sample_masked": "InvoiceNo: PII_60DD3C | StockCode: PII_60DD3C | Description: GIFT | Quantity: 4 | InvoiceDate: Date_...",
+      "sample_unmasked": "InvoiceNo: 4364357239311562 | StockCode: 4364357239311562 | Description: GIFT | Quantity: 4 | Invoic..."
+    },
+    {
+      "record_id": 3,
+      "original_length": 234,
+      "masked_length": 251,
+      "entities_masked": 7,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.13617021276595745,
+      "sample_original": "InvoiceNo: 536368 | StockCode: P5692 | Description: LIKE | Quantity: 25 | InvoiceDate: 2025-04-25 19...",
+      "sample_masked": "InvoiceNo: PII_2DE074 | StockCode: PII_2DE074 | Description: LIKE | Quantity: 25 | InvoiceDate: Date...",
+      "sample_unmasked": "InvoiceNo: 536368 | StockCode: 536368 | Description: LIKE | Quantity: 25 | InvoiceDate: 2025-04-25 1..."
+    },
+    {
+      "record_id": 4,
+      "original_length": 287,
+      "masked_length": 302,
+      "entities_masked": 9,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.125,
+      "sample_original": "InvoiceNo: 536369 | StockCode: P9015 | Description: GIFT | Quantity: 22 | InvoiceDate: 2025-06-06 12...",
+      "sample_masked": "InvoiceNo: PII_CE393F | StockCode: PII_CE393F | Description: GIFT | Quantity: 22 | InvoiceDate: Date...",
+      "sample_unmasked": "InvoiceNo: 536369 | StockCode: 536369 | Description: GIFT | Quantity: 22 | InvoiceDate: 2025-06-06 1..."
+    }
+  ]
+}
