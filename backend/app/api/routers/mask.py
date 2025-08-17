@@ -22,7 +22,7 @@ async def mask_content(request: mask_schema.MaskRequest, db: Session = Depends(g
     # Lưu mapping vào DB
     mask_db = db.get(MaskMapping, request.session_id)
     if mask_db:
-        mask_db.mapping = mapping
+        mask_db.mapping = mask_db.mapping | mapping
     else:
         mask_db = MaskMapping(session_id=request.session_id, mapping=mapping)
         db.add(mask_db)

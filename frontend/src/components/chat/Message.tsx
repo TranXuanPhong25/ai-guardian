@@ -25,7 +25,7 @@ export default function ChatMessage({ chatMessage, sessionId }: { chatMessage: M
     shouldValidate
   );
   
-  const hasSensitive = validationResult?.alert !== null && chatMessage.role === 'user';
+  const hasSensitive = validationResult?.alert !== null 
   
   // Use mutation for masking (only when user toggles)
   const { maskText: maskTextMutation } = useMaskingOperations();
