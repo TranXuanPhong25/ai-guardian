@@ -91,12 +91,21 @@ class FileExtractorService:
                         xref = img[0]
                         base_image = doc.extract_image(xref)
                         image_bytes = base_image["image"]
-                        temp_img_path = f"/tmp/pdf_page_{page_num}_img_{img_index}.png"
-                        with open(temp_img_path, "wb") as f:
-                            f.write(image_bytes)
-                        page_text = self._smoldocling_extract(temp_img_path)
-                        text += page_text + "\n\n"
-                        os.remove(temp_img_path)
+                        # Use tempfile for cross-platform compatibility
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
+                            temp_img_path = temp_file.name
+                            temp_file.write(image_bytes)
+                        try:
+                            page_text = self._smoldocling_extract(temp_img_path)
+                            text += page_text + "\n\n"
+                        except Exception as e:
+                            logger.error(f"Error processing PDF image: {str(e)}")
+                        finally:
+                            if os.path.exists(temp_img_path):
+                                try:
+                                    os.remove(temp_img_path)
+                                except Exception as e:
+                                    logger.warning(f"Failed to remove temp image {temp_img_path}: {str(e)}")
                 doc.close()
 
             elif extension == '.docx':

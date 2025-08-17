@@ -7,7 +7,7 @@ from weaviate.classes.data import DataObject
 
 import weaviate
 from langchain_core.documents import Document
-from langchain_openai import AzureOpenAIEmbeddings  # Giả sử embedding model từ config
+from langchain_openai import AzureOpenAIEmbeddings
 from weaviate.collections.classes.config import Configure
 from weaviate.util import generate_uuid5
 
@@ -18,13 +18,15 @@ class VectorStore:
     """
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)
-        self.config = config  # Store config for later use
-        self.collection_name = config.rag.collection_name  # Class name trong Weaviate
-        self.embedding_model = config.rag.embedding_model  # Ví dụ: AzureOpenAIEmbeddings
+        self.config = config
+        self.collection_name = config.rag.collection_name
+        self.embedding_model = config.rag.embedding_model
         self.retrieval_top_k = config.rag.top_k
-        self.weaviate_url = config.rag.weaviate_url  # Từ config, ví dụ: "http://localhost:8080"
-        self.weaviate_api_key = config.rag.weaviate_api_key  # Từ config
-        
+        self.weaviate_url = config.rag.weaviate_url
+        self.weaviate_api_key = config.rag.weaviate_api_key
+        self.use_hybrid_search = getattr(config.rag, "use_hybrid_search", True)  # Thêm cấu hình hybrid search
+        self.hybrid_alpha = getattr(config.rag, "hybrid_alpha", 0.5)  # Trọng số giữa BM25 và semantic (0: chỉ BM25, 1: chỉ semantic)
+
         # Kết nối Weaviate client
         self.client = weaviate.connect_to_weaviate_cloud(
             auth_credentials=Auth.api_key(api_key=self.weaviate_api_key) if self.weaviate_api_key else None,
@@ -35,7 +37,7 @@ class VectorStore:
         if not self.client.collections.exists(self.collection_name):
             self.client.collections.create(
                 name=self.collection_name,
-                vectorizer_config=Configure.Vectorizer.none(),  # Sử dụng external embeddings
+                vectorizer_config=Configure.Vectorizer.none(),
                 properties=[
                     weaviate.classes.config.Property(
                         name="content",
@@ -56,14 +58,14 @@ class VectorStore:
                 ]
             )
             self.logger.info(f"Tạo class mới trong Weaviate: {self.collection_name}")
+
     def close_conn(self):
         self.client.close()
+
     def chunk_document(self, formatted_document: str) -> List[str]:
         """
         Chunk text đã sẵn thành các đoạn nhỏ (di chuyển từ content_processor.py).
         """
-        # Logic chunking giống cũ: split by sections, then LLM-based semantic chunking
-        # (Copy logic từ content_processor.chunk_document, bỏ phần image)
         SPLIT_PATTERN = "\n#"
         chunks = formatted_document.split(SPLIT_PATTERN)
         
@@ -75,16 +77,12 @@ class VectorStore:
         
         CHUNKING_PROMPT = """
         # Prompt giống cũ, bỏ phần image
-        """.strip()  # Copy prompt từ content_processor.py
+        """.strip()
         
         formatted_chunking_prompt = CHUNKING_PROMPT.format(document_text=chunked_text)
         chunking_response = self.config.rag.chunker_model.invoke(formatted_chunking_prompt).content
         
-        # Split logic giống cũ
-        # (Copy _split_text_by_llm_suggestions từ content_processor.py)
-        # Trả về list chunks
-        
-        return chunks  # Thay bằng kết quả thực tế
+        return chunks
 
     def create_vectorstore(self, document_chunks: List[str], document_path: str) -> Tuple[Any, List[str]]:
         """
@@ -104,15 +102,12 @@ class VectorStore:
                 )
             )
         
-        # Tạo embeddings
         embeddings = self.embedding_model.embed_documents([doc.page_content for doc in langchain_documents])
         
-        # Upsert vào Weaviate using v4 API
         collection = self.client.collections.get(self.collection_name)
         
         data_objects = []
         for i, doc in enumerate(langchain_documents):
-            # Use DataObject class for custom vectors
             data_objects.append(
                 DataObject(
                     properties={
@@ -131,26 +126,47 @@ class VectorStore:
 
     def retrieve_relevant_chunks(self, query: str) -> List[Dict[str, Any]]:
         """
-        Retrieve từ Weaviate dựa trên query.
+        Retrieve từ Weaviate dựa trên query, hỗ trợ hybrid search (BM25 + semantic).
         """
         query_embedding = self.embedding_model.embed_query(query)
-        
-        # Use Weaviate v4 API
         collection = self.client.collections.get(self.collection_name)
-        response = collection.query.near_vector(
-            near_vector=query_embedding,
-            limit=self.retrieval_top_k,
-            return_metadata=['distance']
-        )
         
         retrieved_docs = []
-        for hit in response.objects:
-            doc_dict = {
-                "id": hit.properties.get("doc_id", ""),
-                "content": hit.properties.get("content", ""),
-                "source": hit.properties.get("source", ""),
-                "score": hit.metadata.distance if hit.metadata and hasattr(hit.metadata, 'distance') else 0.0,  # Distance làm score
-            }
-            retrieved_docs.append(doc_dict)
         
+        if self.use_hybrid_search:
+            # Thực hiện hybrid search (kết hợp BM25 và semantic)
+            response = collection.query.hybrid(
+                query=query,
+                vector=query_embedding,
+                alpha=self.hybrid_alpha,  # Trọng số giữa BM25 (0) và semantic (1)
+                limit=self.retrieval_top_k,
+                return_metadata=['distance', 'score']
+            )
+            for hit in response.objects:
+                doc_dict = {
+                    "id": hit.properties.get("doc_id", ""),
+                    "content": hit.properties.get("content", ""),
+                    "source": hit.properties.get("source", ""),
+                    "score": hit.metadata.score if hit.metadata and hasattr(hit.metadata, 'score') else 0.0,
+                    "search_type": "hybrid"  # Ghi nhận loại tìm kiếm
+                }
+                retrieved_docs.append(doc_dict)
+        else:
+            # Chỉ sử dụng semantic search (như cũ)
+            response = collection.query.near_vector(
+                near_vector=query_embedding,
+                limit=self.retrieval_top_k,
+                return_metadata=['distance']
+            )
+            for hit in response.objects:
+                doc_dict = {
+                    "id": hit.properties.get("doc_id", ""),
+                    "content": hit.properties.get("content", ""),
+                    "source": hit.properties.get("source", ""),
+                    "score": hit.metadata.distance if hit.metadata and hasattr(hit.metadata, 'distance') else 0.0,
+                    "search_type": "semantic"
+                }
+                retrieved_docs.append(doc_dict)
+        
+        self.logger.info(f"Retrieved {len(retrieved_docs)} documents using {'hybrid' if self.use_hybrid_search else 'semantic'} search")
         return retrieved_docs

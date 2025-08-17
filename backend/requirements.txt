@@ -54,6 +54,5 @@ supabase
 python-multipart
 langchain_google_genai
 
-langchain_openai
+
 weaviate-client
-protobuf==6.30.0
