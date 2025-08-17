@@ -1,5 +1,7 @@
 # Hàm phát hiện thông tin nhạy cảm (mock, có thể thay thế bằng AI thực tế)
 from app.services.agents.agent_decision import process_query
+import concurrent.futures
+import functools
 
 from sqlalchemy.orm import Session
 import asyncio
@@ -8,13 +10,31 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
 from app.models import Message
 from app.services.unmasking_service import pii_unmasker_service
+from app.models import Message
+from app.services.unmasking_service import pii_unmasker_service
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from uuid import UUID
 import os
 
-async def process_chat(model_id: str, messages, db: Session, chat_session_id: UUID, mapping: dict = None):
+import os
+
+# Create thread pool for blocking operations
+thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
+async def process_query_async(query: str) -> dict:
+    """Async wrapper for process_query to prevent blocking."""
+    loop = asyncio.get_event_loop()
+    try:
+        # Run process_query in thread pool to avoid blocking
+        result = await loop.run_in_executor(thread_pool, process_query, query)
+        return result
+    except Exception as e:
+        print(f"Error in async process_query: {str(e)}")
+        return {"output": f"I apologize, but I encountered an error while processing your request. Please try rephrasing your question."}
+
+async def process_chat(model_id: str, messages: list, db: Session, session_id: str, mapping: dict = None):
 
     # Extract content from messages array
     if isinstance(messages, list) and len(messages) > 0:
@@ -30,7 +50,7 @@ async def process_chat(model_id: str, messages, db: Session, chat_session_id: UU
 
     # Get response from agent decision system with error handling
     try:
-        agent_result = process_query(current_message_content)
+        agent_result = await process_query_async(current_message_content)
     except Exception as e:
         print(f"Error in process_query: {str(e)}")
         # Fallback to simple response
@@ -84,7 +104,7 @@ async def process_chat(model_id: str, messages, db: Session, chat_session_id: UU
     
     # Save the assistant's response to database
     assistant_message = Message(
-        chat_session_id=chat_session_id,
+        chat_session_id=session_id,
         role="assistant",
         content=response_content
     )
