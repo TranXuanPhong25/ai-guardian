@@ -2,13 +2,13 @@
 
 import ChatSection from '@/components/chat/Section';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect } from 'react';
+import { use, useEffect } from 'react';
 import Head from 'next/head';
 
-export default function Home({ params }: { params: { session_id: string } }) {
+export default function Home({ params }: { params: Promise<{ session_id: string }> }) {
   const { user } = useAuth();
 
-  const { session_id: sessionId } = params;
+  const { session_id: sessionId } =  use(params);
 
   useEffect(() => {
     // Update document title

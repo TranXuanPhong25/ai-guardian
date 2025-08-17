@@ -135,26 +135,7 @@ export default function MessageInput({
     e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
     e.preventDefault();
-    if (!input.trim() && attachedFiles.length ===0) return;
-    
-    // If content is masked, we need to unmask it before sending
-    let messageToSend = input;
-    if (isMasked && Object.keys(maskMapping).length > 0) {
-      try {
-        const unmaskResult = await unmaskTextMutation.mutateAsync({
-          maskedText: maskedContent,
-          mapping: maskMapping
-        });
-        if (unmaskResult && unmaskResult.text) {
-          messageToSend = unmaskResult.text;
-        }
-      } catch (error) {
-        console.error('Error unmasking content for submission:', error);
-      }
-    }
-    
-    // Clear the input field and attachments
-    setInput!(messageToSend); // Set the unmasked content temporarily
+    // if (!input.trim() && attachedFiles.length ===0) return;
     setMaskedContent('');
     setMaskMapping({});
     setIsMasked(false);
@@ -345,9 +326,9 @@ export default function MessageInput({
               variant="default"
               size="icon"
               disabled={
-                ((!input.trim() && attachedFiles.length === 0) && !isMasked) || 
+                ((!input.trim())) || 
                 (isMasked && !maskedContent.trim()) || 
-                isMasked 
+                isMasked
               }
               type="submit"
               className="rounded-full "
