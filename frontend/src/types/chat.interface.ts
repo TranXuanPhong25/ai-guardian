@@ -1,7 +1,21 @@
-import { Message } from 'ai';
+// Define basic message interface with file attachments
+export interface MessageWithFiles {
+  id: string;
+  role: 'user' | 'assistant' | 'system' | 'function' | 'data' | 'tool';
+  content: string;
+  createdAt?: Date;
+  name?: string;
+  function_call?: any;
+  tool_calls?: any;
+  attached_files?: {
+    file_id: number;
+    filename: string;
+    file_path: string;
+  }[];
+}
 
 export interface ChatHandler {
-  messages: Message[];
+  messages: MessageWithFiles[];
   input: string;
   isLoading: boolean;
   handleSubmit: (
@@ -19,7 +33,7 @@ export interface ChatHandler {
   onFileError?: (errMsg: string) => void;
   setInput?: (input: string) => void;
   append?: (
-    message: Message | Omit<Message, 'id'>,
+    message: MessageWithFiles | Omit<MessageWithFiles, 'id'>,
     ops?: {
       data: any;
     }

@@ -1,16 +1,26 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List, Optional
 
 from app.api.routers.mask import mask_content
 from app.database.database import get_db
-from app.schemas.chat import ChatRequest, ChatResponse, MessageResponse, ChatSessionResponse, UpdateTitleRequest
+from app.schemas.chat import ChatRequest, ChatResponse, MessageResponse, ChatSessionResponse, UpdateTitleRequest, ChatRequestWithFiles
 from app.schemas.mask import MaskRequest
 from app.services import chat_service
 from app.services.chat_service import process_chat
+from app.services.extraction_service import file_extractor_service
+from app.services.masking_service import PIIMaskerService
 from app.dependencies import verify_jwt
-from app.models import ChatSession, Message
+from app.models import ChatSession, Message, MessageFile, File
 from uuid import UUID
 from datetime import datetime
+import os
+import json
+from app.services.agents.rag_agent import DocumentRAG
+from app.config import Config
+
+config = Config()
+rag = DocumentRAG(config)
 router = APIRouter(prefix="/api")
 
 # route to get all messages of a session
@@ -22,17 +32,44 @@ async def get_chat_history(session_id: UUID, user=Depends(verify_jwt), db: Sessi
     if not chat_session:
         raise HTTPException(status_code=404, detail="Chat session not found")
 
-    # Retrieve all messages in this session
+    # Retrieve all messages in this session with their attached files
     messages = db.query(Message).filter(Message.chat_session_id == session_id).order_by(Message.created_at.asc()).all()
-    return messages
+    
+    # Build response with file attachments
+    response_messages = []
+    for message in messages:
+        # Get attached files for this message
+        attached_files = []
+        for message_file in message.attached_files:
+            attached_files.append({
+                "file_id": message_file.file.file_id,
+                "filename": message_file.file.filename,
+                "file_path": message_file.file.file_path
+            })
+        
+        response_messages.append(MessageResponse(
+            id=message.id,
+            chat_session_id=message.chat_session_id,
+            role=message.role,
+            content=message.content,
+            created_at=message.created_at,
+            attached_files=attached_files
+        ))
+    
+    return response_messages
 
 
 # route to post a message to a session or start a new session
 @router.post("/sessions/{session_id}", response_model=ChatResponse)
-async def continue_chat(session_id: UUID, chat_request: ChatRequest, user=Depends(verify_jwt),
-                        db: Session = Depends(get_db)):
-    model_id = chat_request.model
-
+async def continue_chat(
+    session_id: UUID,
+    request: ChatRequestWithFiles,
+    user=Depends(verify_jwt),
+    db: Session = Depends(get_db)
+):
+    # Initialize services
+    pii_masker_service = PIIMaskerService()
+    
     # Verify the session belongs to the user
     chat_session = db.query(ChatSession).filter(ChatSession.id == session_id,
                                                 ChatSession.user_id == user.user.id).first()
@@ -44,31 +81,98 @@ async def continue_chat(session_id: UUID, chat_request: ChatRequest, user=Depend
         db.add(chat_session)
         db.commit()
         db.refresh(chat_session)
-    user_message = chat_request.messages[-1].content
-    # TODO: implements real functions
-    # # 1. Detect sensitive trước khi masking
-    # sensitive_result = chat_service.detect_sensitive(user_message)
-    #
-    # # 2. Masking nội dung user gửi qua API mask_content
-    # mask_request = MaskRequest(session_id=str(session_id), content=user_message)
-    # mask_result = mask_content(mask_request, db)
-    # masked_text = mask_result["masked_text"]
-    # mapping = mask_result["mapping"]
+
+    user_message = request.messages[-1].content if request.messages else ""
 
     # Update the updated_at timestamp
     if chat_session:
         chat_session.updated_at = datetime.utcnow()
 
     # Add the user's new message to the session
-    message = Message(
+    message_obj = Message(
         chat_session_id=chat_session.id,
         role="user",
         content=user_message
     )
-    db.add(message)
+    db.add(message_obj)
+    db.commit()
+    db.refresh(message_obj)
+
+    # Handle file URLs and text extraction
+    uploaded_files = []
+    extracted_text_content = ""
+    
+    if request.fileUrls:
+        all_extracted_text = []
+        
+        for file_url in request.fileUrls:
+            try:
+                # Get file from database by URL
+                file_obj = db.query(File).filter(File.file_path == file_url, 
+                                                File.user_id == user.user.id).first()
+                if not file_obj:
+                    print(f"File not found for URL: {file_url}")
+                    continue
+
+                # Associate file with message
+                message_file = MessageFile(
+                    message_id=message_obj.id,
+                    file_id=file_obj.file_id
+                )
+                db.add(message_file)
+                uploaded_files.append(file_obj)
+
+                # Use already extracted text or extract if needed
+                if file_obj.extracted_text:
+                    all_extracted_text.append(f"From file '{file_obj.filename}':\n{file_obj.extracted_text}")
+                else:
+                    # Extract text from the file
+                    try:
+                        file_extension = os.path.splitext(file_obj.filename)[1]
+                        print(f"Extracting text from file {file_obj.filename} with extension {file_extension}")
+                        extracted_text = file_extractor_service.extract_text(file_url, file_extension)
+                        if extracted_text:
+                            # Save extracted text to database
+                            file_obj.extracted_text = extracted_text
+                            all_extracted_text.append(f"From file '{file_obj.filename}':\n{extracted_text}")
+                            rag.ingest_file(extracted_text, file_url)
+                    except Exception as e:
+                        print(f"Error extracting text from file {file_obj.filename}: {str(e)}")
+
+            except Exception as e:
+                print(f"Error processing file URL {file_url}: {str(e)}")
+                # Continue with chat even if file processing fails
+
+        # Combine all extracted text
+        if all_extracted_text:
+            extracted_text_content = "\n\n---\n\n".join(all_extracted_text)
+        extracted_text_content = extracted_text_content.strip()
+
     db.commit()
 
-    return await process_chat(model_id, chat_request.messages, db, session_id)
+    # Prepare content for masking (user message + file context)
+    content_to_mask = user_message
+    if extracted_text_content:
+        content_to_mask += f"\n\n\nFile context:\n{extracted_text_content}"
+    mapping = {}
+    # Mask the combined content (user message + extracted text from files)
+    try:
+        mask_request = MaskRequest(session_id=str(session_id), content=content_to_mask)
+        mask_result = await mask_content(mask_request, db)
+        masked_text = mask_result["masked_text"]
+        mapping = mask_result["mapping"]
+        
+        # Use masked content for processing
+        processing_content = masked_text
+    except Exception as e:
+        print(f"Error masking content: {str(e)}")
+        # If masking fails, use original content
+        processing_content = content_to_mask
+
+    # Create chat messages for processing with RAG context
+    chat_messages = [{"role": "user", "content": processing_content}]
+    
+    return await process_chat(request.model, chat_messages, db, session_id, mapping)
 
 
 # route to get all chat sessions

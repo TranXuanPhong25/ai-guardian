@@ -12,4 +12,4 @@ class ChatSession(Base):
     title = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    messages = relationship("Message", back_populates="chat_session")
+    messages = relationship("Message", back_populates="chat_session", cascade="all, delete-orphan")

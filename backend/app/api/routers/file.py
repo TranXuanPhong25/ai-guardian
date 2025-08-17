@@ -15,11 +15,13 @@ from app.services.minio_service import upload_file_to_minio, delete_file_from_mi
 from uuid import uuid4
 from datetime import datetime
 
+from app.dependencies import verify_jwt
+
 router = APIRouter(prefix="/file", tags=["File"])
 logger = logging.getLogger(__name__)
 
 @router.post("/upload", response_model=file_schema.FileUploadResponse)
-def upload_file(user_id: str, file: UploadFile = FastAPIFile(...), db: Session = Depends(get_db)):
+def upload_file(file: UploadFile = FastAPIFile(...), user=Depends(verify_jwt), db: Session = Depends(get_db)):
     """
     API upload file:
     - Nhận file upload từ client và user_id.
@@ -46,7 +48,7 @@ def upload_file(user_id: str, file: UploadFile = FastAPIFile(...), db: Session =
 
         # Tạo đối tượng File và lưu vào database
         file_obj = File(
-            user_id=user_id,
+            user_id=user.user.id,
             filename=file.filename,
             file_path=url,
             created_at=datetime.utcnow()
@@ -58,6 +60,7 @@ def upload_file(user_id: str, file: UploadFile = FastAPIFile(...), db: Session =
         return file_schema.FileUploadResponse(
             file_id=file_obj.file_id,
             filename=file_obj.filename,
+            url=file_obj.file_path,
             created_at=file_obj.created_at
         )
     

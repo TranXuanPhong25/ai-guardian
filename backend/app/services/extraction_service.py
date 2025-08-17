@@ -1,4 +1,6 @@
 import os
+import tempfile
+import requests
 from typing import Optional
 import logging
 from docx import Document as DocxDocument
@@ -8,6 +10,7 @@ import fitz  # PyMuPDF
 from docling_core.types.doc.document import DocTagsDocument, DoclingDocument
 from transformers import AutoProcessor, AutoModelForVision2Seq
 from transformers.image_utils import load_image
+from urllib.parse import urlparse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,17 +45,44 @@ class FileExtractorService:
             logger.error(f"Error in smoldocling_extract: {str(e)}")
             return ""
 
-    def extract_text(self, file_path: str, file_format: str = ".png") -> Optional[str]:
-        """Extract text from a file based on its extension."""
-        logger.info("extracting "+ file_path)
+    def _download_file_from_url(self, file_url: str, file_extension: str) -> str:
+        """Download file from URL to temporary local file."""
         try:
+            response = requests.get(file_url)
+            response.raise_for_status()
+            
+            # Create temporary file with proper extension
+            with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
+                temp_file.write(response.content)
+                return temp_file.name
+        except Exception as e:
+            logger.error(f"Error downloading file from URL {file_url}: {str(e)}")
+            raise
+
+    def extract_text(self, file_path: str, file_format: str = ".png") -> Optional[str]:
+        """Extract text from a file based on its extension. 
+        file_path can be either a local path or a URL."""
+        logger.info("extracting "+ file_path)
+        
+        # Check if file_path is a URL
+        is_url = urlparse(file_path).scheme in ('http', 'https')
+        temp_file_path = None
+        
+        try:
+            if is_url:
+                # Download file to temporary location
+                temp_file_path = self._download_file_from_url(file_path, file_format)
+                actual_file_path = temp_file_path
+            else:
+                actual_file_path = file_path
+                
             extension = file_format
             text = ""
 
             if extension in ['.png', '.jpg', '.jpeg']:
-                text = self._smoldocling_extract(file_path)
+                text = self._smoldocling_extract(actual_file_path)
             elif extension == '.pdf':
-                doc = fitz.open(file_path)
+                doc = fitz.open(actual_file_path)
                 for page_num in range(len(doc)):
                     page = doc[page_num]
                     page_text = page.get_text("text")
@@ -70,7 +100,7 @@ class FileExtractorService:
                 doc.close()
 
             elif extension == '.docx':
-                doc = DocxDocument(file_path)
+                doc = DocxDocument(actual_file_path)
                 for paragraph in doc.paragraphs:
                     text += paragraph.text + "\n"
                 for table in doc.tables:
@@ -78,12 +108,33 @@ class FileExtractorService:
                         row_text = "\t".join(cell.text.strip() for cell in row.cells)
                         text += row_text + "\n"
 
+            elif extension == '.txt':
+                # Read plain text files with encoding detection
+                try:
+                    # Try UTF-8 first
+                    with open(actual_file_path, 'r', encoding='utf-8') as f:
+                        text = f.read()
+                except UnicodeDecodeError:
+                    # Fallback to other common encodings
+                    encodings_to_try = ['latin-1', 'cp1252', 'iso-8859-1']
+                    for encoding in encodings_to_try:
+                        try:
+                            with open(actual_file_path, 'r', encoding=encoding) as f:
+                                text = f.read()
+                            break
+                        except UnicodeDecodeError:
+                            continue
+                    else:
+                        # If all encodings fail, read as binary and decode with errors='ignore'
+                        with open(actual_file_path, 'rb') as f:
+                            text = f.read().decode('utf-8', errors='ignore')
+
             elif extension in ['.xls', '.xlsx', '.csv']:
                 if extension == '.csv':
-                    df = pd.read_csv(file_path)
+                    df = pd.read_csv(actual_file_path)
                     text += df.to_string(index=False) + "\n\n"
                 else:
-                    sheets = pd.read_excel(file_path, sheet_name=None)
+                    sheets = pd.read_excel(actual_file_path, sheet_name=None)
                     for sheet_name, sheet_data in sheets.items():
                         text += f"--- Sheet: {sheet_name} ---\n"
                         text += sheet_data.to_string(index=False) + "\n\n"
@@ -95,5 +146,12 @@ class FileExtractorService:
         except Exception as e:
             logger.error(f"Error extracting text from {file_path}: {str(e)}")
             return None
+        finally:
+            # Clean up temporary file if it was created
+            if temp_file_path and os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                except Exception as e:
+                    logger.warning(f"Failed to remove temporary file {temp_file_path}: {str(e)}")
 
 file_extractor_service = FileExtractorService()

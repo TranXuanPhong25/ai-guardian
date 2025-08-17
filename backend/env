@@ -1,0 +1,37 @@
+SECRET_KEY=fantastic4
+GOOGLE_API_KEY=AIzaSyDfHiiykM7ejP8IKdsaT0Xjcm5nTQWlgaA
+SUPABASE_URL=https://brfrxfcarnautlazadju.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyZnJ4ZmNhcm5hdXRsYXphZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwNTA3MzAsImV4cCI6MjA3MDYyNjczMH0.2sjRieoPKTx7bSxwaHZFPD5TOqWfiBw6XkwQXfKBXPk
+DATABASE_URL=postgresql://postgres.brfrxfcarnautlazadju:EVJ4ve9fGJAL68_@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres
+# LLM Configuration (Azure Open AI - gpt-4o used in development)
+# If using any other LLM API key or local LLM, appropriate code modification is required
+deployment_name=gpt-4o
+model_name=gpt-4o
+azure_endpoint=https://22028-macdc51a-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview
+openai_api_key=6DCK2qZyr4lQjKcaa1GFqMYWqmh3iPyCX1Edjr3TVM1e4wLsz6ESJQQJ99BEACHYHv6XJ3w3AAAAACOGb2vj
+openai_api_version=2024-12-01-preview
+
+# Embedding Model Configuration (Azure Open AI - text-embedding-ada-002 used in development)
+# If using any other embedding model, appropriate code modification is required
+embedding_deployment_name=text-embedding-ada-002
+embedding_model_name=text-embedding-ada-002
+embedding_azure_endpoint=https://22028-macdc51a-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15
+embedding_openai_api_key=6DCK2qZyr4lQjKcaa1GFqMYWqmh3iPyCX1Edjr3TVM1e4wLsz6ESJQQJ99BEACHYHv6XJ3w3AAAAACOGb2vj
+embedding_openai_api_version=2023-05-15
+
+# Speech API Key (Free credits available with new Eleven Labs Account)
+ELEVEN_LABS_API_KEY=sk_2a21729583b264db51bdb56f570aee489d03b715c93ee3e4
+
+# Web Search API Key (Free credits available with new Tavily Account)
+TAVILY_API_KEY=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
+
+# Hugging Face Token - using reranker model "ms-marco-TinyBERT-L-6"
+HUGGINGFACE_TOKEN=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
+
+# (OPTIONAL) If using Qdrant server version, local does not require API key
+WEAVIATE_URL=tzzar6zjqugv6ovweimaa.c0.asia-southeast1.gcp.weaviate.cloud
+WEAVIATE_API_KEY=NzhER1RkNXo0Q21nTjZ4Y19NM1UzTnJNR1JhN3VPWE54SG9HeGN6aEI1akVOV3dUUm1wTG1sVkk3VTVJPV92MjAw
+
+#Azure
+AZURE_SPEECH_KEY=55NDw1eSi3nWbcoXpZkwPQW9BDaxSIT3JVTBP9wKCNe6KHRyi7d5JQQJ99BEACqBBLyXJ3w3AAAYACOGK1xZ
+AZURE_SPEECH_REGION=southeastasia

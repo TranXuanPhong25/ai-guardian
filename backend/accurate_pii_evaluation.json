@@ -1,0 +1,873 @@
+{
+  "evaluation_type": "Accurate PII Evaluation with Ground Truth",
+  "timestamp": "2025-08-17T09:14:36.905800",
+  "detection_accuracy": {
+    "precision": 0.950920245398773,
+    "recall": 0.8072916666666666,
+    "f1_score": 0.8732394366197183,
+    "total_true_positives": 465,
+    "total_false_positives": 24,
+    "total_false_negatives": 111
+  },
+  "masking_accuracy": {
+    "masking_success_rate": 1.0,
+    "roundtrip_success_rate": 0.0,
+    "total_processed": 50,
+    "successful_masks": 50,
+    "perfect_roundtrips": 0
+  },
+  "detailed_detection_samples": [
+    {
+      "record_id": 0,
+      "text": "InvoiceNo: 536365 | StockCode: P2926 | Description: ITEM | Quantity: 22 | InvoiceDate: 2025-03-02 03:17:22 | UnitPrice: 60.47 | CustomerID: 94660 | Co...",
+      "ground_truth_count": 2,
+      "raw_detected_count": 7,
+      "filtered_detected_count": 2,
+      "raw_accuracy": {
+        "true_positives": 1,
+        "false_positives": 6,
+        "false_negatives": 1,
+        "precision": 0.14285714285714285,
+        "recall": 0.5,
+        "f1_score": 0.22222222222222224,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Vi Lê"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "janetran@example.net"
+          ]
+        ],
+        "detected": [
+          [
+            "LOCATION",
+            "Georgia"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P2926"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536365"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "janetran@example.net"
+          ],
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "PERSON",
+            "Vi Lê | CustomerEmail"
+          ],
+          [
+            "DATE_TIME",
+            "2025-03-02"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "EMAIL_ADDRESS",
+            "janetran@example.net"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "US_DRIVER_LICENSE",
+            "P2926"
+          ],
+          [
+            "LOCATION",
+            "Georgia"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536365"
+          ],
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "PERSON",
+            "Vi Lê | CustomerEmail"
+          ],
+          [
+            "DATE_TIME",
+            "2025-03-02"
+          ]
+        ],
+        "missed_entities": [
+          [
+            "PERSON",
+            "Vi Lê"
+          ]
+        ]
+      },
+      "filtered_accuracy": {
+        "true_positives": 1,
+        "false_positives": 1,
+        "false_negatives": 1,
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1_score": 0.5,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Vi Lê"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "janetran@example.net"
+          ]
+        ],
+        "detected": [
+          [
+            "EMAIL_ADDRESS",
+            "janetran@example.net"
+          ],
+          [
+            "PERSON",
+            "Vi Lê | CustomerEmail"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "EMAIL_ADDRESS",
+            "janetran@example.net"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "PERSON",
+            "Vi Lê | CustomerEmail"
+          ]
+        ],
+        "missed_entities": [
+          [
+            "PERSON",
+            "Vi Lê"
+          ]
+        ]
+      }
+    },
+    {
+      "record_id": 1,
+      "text": "InvoiceNo: 536366 | StockCode: P5613 | Description: LIKE | Quantity: 17 | InvoiceDate: 2025-05-18 16:40:45 | UnitPrice: 63.15 | CustomerID: 64136 | Co...",
+      "ground_truth_count": 3,
+      "raw_detected_count": 9,
+      "filtered_detected_count": 3,
+      "raw_accuracy": {
+        "true_positives": 3,
+        "false_positives": 6,
+        "false_negatives": 0,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1_score": 0.5,
+        "ground_truth": [
+          [
+            "EMAIL_ADDRESS",
+            "john18@example.com"
+          ],
+          [
+            "US_SSN",
+            "078-38-0590"
+          ],
+          [
+            "PERSON",
+            "Olivia Morrison"
+          ]
+        ],
+        "detected": [
+          [
+            "DATE_TIME",
+            "2025-05-18"
+          ],
+          [
+            "PERSON",
+            "Olivia Morrison"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P5613"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "john18@example.com"
+          ],
+          [
+            "NRP",
+            "Central African Republic"
+          ],
+          [
+            "URL",
+            "example.com"
+          ],
+          [
+            "US_SSN",
+            "078-38-0590"
+          ],
+          [
+            "PHONE_NUMBER",
+            "078-38-0590"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536366"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "EMAIL_ADDRESS",
+            "john18@example.com"
+          ],
+          [
+            "US_SSN",
+            "078-38-0590"
+          ],
+          [
+            "PERSON",
+            "Olivia Morrison"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "DATE_TIME",
+            "2025-05-18"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P5613"
+          ],
+          [
+            "NRP",
+            "Central African Republic"
+          ],
+          [
+            "URL",
+            "example.com"
+          ],
+          [
+            "PHONE_NUMBER",
+            "078-38-0590"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536366"
+          ]
+        ],
+        "missed_entities": []
+      },
+      "filtered_accuracy": {
+        "true_positives": 3,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "ground_truth": [
+          [
+            "EMAIL_ADDRESS",
+            "john18@example.com"
+          ],
+          [
+            "US_SSN",
+            "078-38-0590"
+          ],
+          [
+            "PERSON",
+            "Olivia Morrison"
+          ]
+        ],
+        "detected": [
+          [
+            "EMAIL_ADDRESS",
+            "john18@example.com"
+          ],
+          [
+            "US_SSN",
+            "078-38-0590"
+          ],
+          [
+            "PERSON",
+            "Olivia Morrison"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "EMAIL_ADDRESS",
+            "john18@example.com"
+          ],
+          [
+            "US_SSN",
+            "078-38-0590"
+          ],
+          [
+            "PERSON",
+            "Olivia Morrison"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": []
+      }
+    },
+    {
+      "record_id": 2,
+      "text": "InvoiceNo: 536367 | StockCode: P4586 | Description: ITEM | Quantity: 48 | InvoiceDate: 2025-03-12 20:19:16 | UnitPrice: 47.48 | CustomerID: 30573 | Co...",
+      "ground_truth_count": 3,
+      "raw_detected_count": 8,
+      "filtered_detected_count": 2,
+      "raw_accuracy": {
+        "true_positives": 2,
+        "false_positives": 6,
+        "false_negatives": 1,
+        "precision": 0.25,
+        "recall": 0.6666666666666666,
+        "f1_score": 0.36363636363636365,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Eduardo Davis"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(00)643-7941"
+          ],
+          [
+            "CREDIT_CARD",
+            "30266896536308"
+          ]
+        ],
+        "detected": [
+          [
+            "US_BANK_NUMBER",
+            "30266896536308"
+          ],
+          [
+            "DATE_TIME",
+            "2025-03-12"
+          ],
+          [
+            "LOCATION",
+            "South Korea"
+          ],
+          [
+            "PERSON",
+            "Eduardo Davis"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "30266896536308"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P4586"
+          ],
+          [
+            "CREDIT_CARD",
+            "30266896536308"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536367"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Eduardo Davis"
+          ],
+          [
+            "CREDIT_CARD",
+            "30266896536308"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "US_BANK_NUMBER",
+            "30266896536308"
+          ],
+          [
+            "DATE_TIME",
+            "2025-03-12"
+          ],
+          [
+            "LOCATION",
+            "South Korea"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "30266896536308"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P4586"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536367"
+          ]
+        ],
+        "missed_entities": [
+          [
+            "PHONE_NUMBER",
+            "(00)643-7941"
+          ]
+        ]
+      },
+      "filtered_accuracy": {
+        "true_positives": 2,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1_score": 0.8,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Eduardo Davis"
+          ],
+          [
+            "PHONE_NUMBER",
+            "(00)643-7941"
+          ],
+          [
+            "CREDIT_CARD",
+            "30266896536308"
+          ]
+        ],
+        "detected": [
+          [
+            "PERSON",
+            "Eduardo Davis"
+          ],
+          [
+            "CREDIT_CARD",
+            "30266896536308"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Eduardo Davis"
+          ],
+          [
+            "CREDIT_CARD",
+            "30266896536308"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": [
+          [
+            "PHONE_NUMBER",
+            "(00)643-7941"
+          ]
+        ]
+      }
+    },
+    {
+      "record_id": 3,
+      "text": "InvoiceNo: 536368 | StockCode: P3658 | Description: LIKE | Quantity: 7 | InvoiceDate: 2024-09-05 20:37:26 | UnitPrice: 49.86 | CustomerID: 44268 | Cou...",
+      "ground_truth_count": 4,
+      "raw_detected_count": 12,
+      "filtered_detected_count": 5,
+      "raw_accuracy": {
+        "true_positives": 4,
+        "false_positives": 8,
+        "false_negatives": 0,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1_score": 0.5,
+        "ground_truth": [
+          [
+            "CREDIT_CARD",
+            "4490260369066799"
+          ],
+          [
+            "PERSON",
+            "Linh Mai"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "john51@example.net"
+          ],
+          [
+            "US_SSN",
+            "273-72-6998"
+          ]
+        ],
+        "detected": [
+          [
+            "PERSON",
+            "StockCode"
+          ],
+          [
+            "CREDIT_CARD",
+            "4490260369066799"
+          ],
+          [
+            "PERSON",
+            "Linh Mai"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "john51@example.net"
+          ],
+          [
+            "US_BANK_NUMBER",
+            "4490260369066799"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "4490260369066799"
+          ],
+          [
+            "DATE_TIME",
+            "2024-09-05"
+          ],
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P3658"
+          ],
+          [
+            "LOCATION",
+            "North Macedonia"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536368"
+          ],
+          [
+            "US_SSN",
+            "273-72-6998"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "CREDIT_CARD",
+            "4490260369066799"
+          ],
+          [
+            "US_SSN",
+            "273-72-6998"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "john51@example.net"
+          ],
+          [
+            "PERSON",
+            "Linh Mai"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "PERSON",
+            "StockCode"
+          ],
+          [
+            "US_BANK_NUMBER",
+            "4490260369066799"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "4490260369066799"
+          ],
+          [
+            "DATE_TIME",
+            "2024-09-05"
+          ],
+          [
+            "URL",
+            "example.net"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P3658"
+          ],
+          [
+            "LOCATION",
+            "North Macedonia"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536368"
+          ]
+        ],
+        "missed_entities": []
+      },
+      "filtered_accuracy": {
+        "true_positives": 4,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1_score": 0.888888888888889,
+        "ground_truth": [
+          [
+            "CREDIT_CARD",
+            "4490260369066799"
+          ],
+          [
+            "PERSON",
+            "Linh Mai"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "john51@example.net"
+          ],
+          [
+            "US_SSN",
+            "273-72-6998"
+          ]
+        ],
+        "detected": [
+          [
+            "PERSON",
+            "StockCode"
+          ],
+          [
+            "CREDIT_CARD",
+            "4490260369066799"
+          ],
+          [
+            "PERSON",
+            "Linh Mai"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "john51@example.net"
+          ],
+          [
+            "US_SSN",
+            "273-72-6998"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "CREDIT_CARD",
+            "4490260369066799"
+          ],
+          [
+            "US_SSN",
+            "273-72-6998"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "john51@example.net"
+          ],
+          [
+            "PERSON",
+            "Linh Mai"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "PERSON",
+            "StockCode"
+          ]
+        ],
+        "missed_entities": []
+      }
+    },
+    {
+      "record_id": 4,
+      "text": "InvoiceNo: 536369 | StockCode: P3482 | Description: ITEM | Quantity: 8 | InvoiceDate: 2025-05-20 15:34:39 | UnitPrice: 70.65 | CustomerID: 49721 | Cou...",
+      "ground_truth_count": 2,
+      "raw_detected_count": 7,
+      "filtered_detected_count": 2,
+      "raw_accuracy": {
+        "true_positives": 2,
+        "false_positives": 5,
+        "false_negatives": 0,
+        "precision": 0.2857142857142857,
+        "recall": 1.0,
+        "f1_score": 0.4444444444444445,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Ngọc Lê"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "zturner@example.com"
+          ]
+        ],
+        "detected": [
+          [
+            "PERSON",
+            "Ngọc Lê"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "P3482"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "zturner@example.com"
+          ],
+          [
+            "LOCATION",
+            "Mexico"
+          ],
+          [
+            "URL",
+            "example.com"
+          ],
+          [
+            "DATE_TIME",
+            "2025-05-20"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536369"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Ngọc Lê"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "zturner@example.com"
+          ]
+        ],
+        "false_positives_list": [
+          [
+            "US_DRIVER_LICENSE",
+            "P3482"
+          ],
+          [
+            "LOCATION",
+            "Mexico"
+          ],
+          [
+            "URL",
+            "example.com"
+          ],
+          [
+            "DATE_TIME",
+            "2025-05-20"
+          ],
+          [
+            "US_DRIVER_LICENSE",
+            "536369"
+          ]
+        ],
+        "missed_entities": []
+      },
+      "filtered_accuracy": {
+        "true_positives": 2,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "ground_truth": [
+          [
+            "PERSON",
+            "Ngọc Lê"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "zturner@example.com"
+          ]
+        ],
+        "detected": [
+          [
+            "PERSON",
+            "Ngọc Lê"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "zturner@example.com"
+          ]
+        ],
+        "correct_detections": [
+          [
+            "PERSON",
+            "Ngọc Lê"
+          ],
+          [
+            "EMAIL_ADDRESS",
+            "zturner@example.com"
+          ]
+        ],
+        "false_positives_list": [],
+        "missed_entities": []
+      }
+    }
+  ],
+  "detailed_masking_samples": [
+    {
+      "record_id": 0,
+      "original_length": 224,
+      "masked_length": 236,
+      "entities_masked": 7,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.15555555555555556,
+      "sample_original": "InvoiceNo: 536365 | StockCode: P2926 | Description: ITEM | Quantity: 22 | InvoiceDate: 2025-03-02 03...",
+      "sample_masked": "InvoiceNo: PII_D6B9F8 | StockCode: PII_D6B9F8 | Description: ITEM | Quantity: 22 | InvoiceDate: Date...",
+      "sample_unmasked": "InvoiceNo: 536365 | StockCode: 536365 | Description: ITEM | Quantity: 22 | InvoiceDate: 2025-03-02 0..."
+    },
+    {
+      "record_id": 1,
+      "original_length": 268,
+      "masked_length": 268,
+      "entities_masked": 9,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.12639405204460966,
+      "sample_original": "InvoiceNo: 536366 | StockCode: P5613 | Description: LIKE | Quantity: 17 | InvoiceDate: 2025-05-18 16...",
+      "sample_masked": "InvoiceNo: PII_8ADD18 | StockCode: PII_8ADD18 | Description: LIKE | Quantity: 17 | InvoiceDate: Date...",
+      "sample_unmasked": "InvoiceNo: 536366 | StockCode: 536366 | Description: LIKE | Quantity: 17 | InvoiceDate: 2025-05-18 1..."
+    },
+    {
+      "record_id": 2,
+      "original_length": 257,
+      "masked_length": 264,
+      "entities_masked": 7,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.0948905109489051,
+      "sample_original": "InvoiceNo: 536367 | StockCode: P4586 | Description: ITEM | Quantity: 48 | InvoiceDate: 2025-03-12 20...",
+      "sample_masked": "InvoiceNo: PII_B5D241 | StockCode: PII_B5D241 | Description: ITEM | Quantity: 48 | InvoiceDate: Date...",
+      "sample_unmasked": "InvoiceNo: 30266896536308 | StockCode: 30266896536308 | Description: ITEM | Quantity: 48 | InvoiceDa..."
+    },
+    {
+      "record_id": 3,
+      "original_length": 282,
+      "masked_length": 298,
+      "entities_masked": 11,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.10927152317880795,
+      "sample_original": "InvoiceNo: 536368 | StockCode: P3658 | Description: LIKE | Quantity: 7 | InvoiceDate: 2024-09-05 20:...",
+      "sample_masked": "InvoiceNo: PII_127969 | Name_F2E33E: PII_127969 | Description: LIKE | Quantity: 7 | InvoiceDate: Dat...",
+      "sample_unmasked": "InvoiceNo: 4490260369066799 | Linh Mai: 4490260369066799 | Description: LIKE | Quantity: 7 | Invoice..."
+    },
+    {
+      "record_id": 4,
+      "original_length": 223,
+      "masked_length": 251,
+      "entities_masked": 7,
+      "masking_successful": true,
+      "perfect_roundtrip": false,
+      "text_similarity": 0.14285714285714285,
+      "sample_original": "InvoiceNo: 536369 | StockCode: P3482 | Description: ITEM | Quantity: 8 | InvoiceDate: 2025-05-20 15:...",
+      "sample_masked": "InvoiceNo: PII_CE393F | StockCode: PII_CE393F | Description: ITEM | Quantity: 8 | InvoiceDate: Date_...",
+      "sample_unmasked": "InvoiceNo: 536369 | StockCode: 536369 | Description: ITEM | Quantity: 8 | InvoiceDate: 2025-05-20 15..."
+    }
+  ]
+}
