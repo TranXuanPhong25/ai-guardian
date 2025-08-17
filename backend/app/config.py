@@ -95,7 +95,8 @@ class RAGConfig:
         self.include_sources = True
         self.min_retrieval_confidence = 0.7  # Điều chỉnh cho Weaviate (distance-based)
         self.context_limit = 20  # Last 20 messages (10 Q&A pairs) in history
-
+        self.use_hybrid_search = True
+        self.hybrid_alpha = 0.5  # 0.0: chỉ BM25, 1.0: chỉ semantic, 0.5: cân bằng
 class APIConfig:
     def __init__(self):
         self.host = "0.0.0.0"
