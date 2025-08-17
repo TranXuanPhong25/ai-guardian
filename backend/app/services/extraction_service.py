@@ -108,6 +108,27 @@ class FileExtractorService:
                         row_text = "\t".join(cell.text.strip() for cell in row.cells)
                         text += row_text + "\n"
 
+            elif extension == '.txt':
+                # Read plain text files with encoding detection
+                try:
+                    # Try UTF-8 first
+                    with open(actual_file_path, 'r', encoding='utf-8') as f:
+                        text = f.read()
+                except UnicodeDecodeError:
+                    # Fallback to other common encodings
+                    encodings_to_try = ['latin-1', 'cp1252', 'iso-8859-1']
+                    for encoding in encodings_to_try:
+                        try:
+                            with open(actual_file_path, 'r', encoding=encoding) as f:
+                                text = f.read()
+                            break
+                        except UnicodeDecodeError:
+                            continue
+                    else:
+                        # If all encodings fail, read as binary and decode with errors='ignore'
+                        with open(actual_file_path, 'rb') as f:
+                            text = f.read().decode('utf-8', errors='ignore')
+
             elif extension in ['.xls', '.xlsx', '.csv']:
                 if extension == '.csv':
                     df = pd.read_csv(actual_file_path)

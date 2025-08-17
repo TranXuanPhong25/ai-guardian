@@ -4,10 +4,16 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import SignUp from './SignUp';
+import Head from 'next/head';
 
 const SignUpPage = () => {
   const { user } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    // Update document title
+    document.title = 'Sign Up - AI Guardian';
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -16,9 +22,15 @@ const SignUpPage = () => {
   }, [user, router]);
 
   return (
-    <div className="flex items-center justify-center h-full">
-      <SignUp />
-    </div>
+    <>
+      <Head>
+        <title>Sign Up - AI Guardian</title>
+        <meta name="description" content="Create an account with AI Guardian" />
+      </Head>
+      <div className="flex items-center justify-center h-full">
+        <SignUp />
+      </div>
+    </>
   );
 };
 

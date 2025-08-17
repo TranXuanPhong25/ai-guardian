@@ -350,7 +350,7 @@ export default function MessageInput({
                 isMasked 
               }
               type="submit"
-              className="rounded-full"
+              className="rounded-full "
             >
               <ArrowUp />
             </Button>
