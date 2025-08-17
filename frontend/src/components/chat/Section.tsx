@@ -11,6 +11,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { useChatSession } from '@/context/ChatSessionContext';
 import { ILLMModel } from '@/types/chat.interface';
 import { fileService } from '@/services/fileService';
+import { toast } from '../ui/use-toast';
 
 type ChatSectionProps = {
   sessionId?: string;
@@ -135,6 +136,17 @@ export default function ChatSection({ sessionId }: ChatSectionProps) {
   // Function to handle file attachment (called from MessageInput)
   const handleFileAttach = async (files: File[]) => {
     if(!user) return;
+    if (files.length === 0) return;
+    for (const file of files) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({
+          title: 'File too large',
+          description: 'Please upload files smaller than 2MB.',
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
     try {
       const uploadPromises = files.map(file => fileService.uploadFile(file, user?.id));
       const fileInfos = await Promise.all(uploadPromises);
