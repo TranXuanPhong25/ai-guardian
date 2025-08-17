@@ -19,7 +19,6 @@ class DocumentRAG:
         Args:
             config: Configuration object with RAG settings
         """
-        # Set up logging
         self.logger = logging.getLogger(f"{self.__module__}")
         self.logger.info("Initializing Document RAG system")
         self.config = config
@@ -47,11 +46,9 @@ class DocumentRAG:
         self.logger.info(f"Ingesting files from directory: {directory_path}")
         
         try:
-            # Check if directory exists
             if not os.path.isdir(directory_path):
                 raise ValueError(f"Directory not found: {directory_path}")
             
-            # Get all text files in the directory (assume .txt or similar)
             files = [os.path.join(directory_path, f) for f in os.listdir(directory_path) 
                      if os.path.isfile(os.path.join(directory_path, f)) and f.endswith('.txt')]
             
@@ -64,18 +61,15 @@ class DocumentRAG:
                     "processing_time": time.time() - start_time
                 }
             
-            # Track statistics
             total_chunks_processed = 0
             successful_ingestions = 0
             failed_ingestions = 0
             failed_files = []
             
-            # Process each file
             for file_path in files:
                 self.logger.info(f"Processing file {successful_ingestions + failed_ingestions + 1}/{len(files)}: {file_path}")
                 
                 try:
-                    # Read text content
                     with open(file_path, 'r', encoding='utf-8') as f:
                         text_content = f.read()
                     result = self.ingest_file(text_content, file_path)
@@ -122,12 +116,10 @@ class DocumentRAG:
         self.logger.info(f"Ingesting file: {document_path}")
 
         try:
-            # Step 1: Chunk document into semantic sections
             self.logger.info("1. Chunking document into semantic sections...")
             document_chunks = self.vector_store.chunk_document(text_content)
             self.logger.info(f"   Document split into {len(document_chunks)} chunks")
 
-            # Step 2: Create vector store
             self.logger.info("2. Creating vector store knowledge base...")
             self.vector_store.create_vectorstore(
                 document_chunks=document_chunks, 
@@ -163,9 +155,7 @@ class DocumentRAG:
         start_time = time.time()
         self.logger.info(f"RAG Agent processing query: {query}")
         
-        # Process query and return result, passing chat_history
         try:
-            # Step 1: Expand query
             self.logger.info(f"1. Expanding query: '{query}'")
             expansion_result = self.query_expander.expand_query(query)
             expanded_query = expansion_result["expanded_query"]
@@ -173,32 +163,28 @@ class DocumentRAG:
             self.logger.info(f"   Expanded: '{expanded_query}'")
             query = expanded_query
 
-            # Step 2: Retrieval
             self.logger.info(f"2. Retrieving relevant documents for the query: '{query}'")
             retrieved_documents = self.vector_store.retrieve_relevant_chunks(query=query)
-            self.logger.info(f"   Retrieved {len(retrieved_documents)} relevant document chunks")
+            self.logger.info(f"   Retrieved {len(retrieved_documents)} relevant document chunks (search type: {retrieved_documents[0]['search_type'] if retrieved_documents else 'none'})")
 
-            # Step 3: Rerank the retrieved documents if we have a reranker and enough documents
             self.logger.info(f"3. Reranking the retrieved documents")
             if self.reranker and len(retrieved_documents) > 1:
-                reranked_documents, _ = self.reranker.rerank(query, retrieved_documents, "")  # Bỏ parsed_content_dir vì không còn images
+                reranked_documents, _ = self.reranker.rerank(query, retrieved_documents, "")
                 self.logger.info(f"   Reranked retrieved documents and chose top {len(reranked_documents)}")
             else:
                 self.logger.info(f"   Could not rerank the retrieved documents, falling back to original scores")
                 reranked_documents = retrieved_documents
 
-            # Step 4: Generate response
             self.logger.info("4. Generating response...")
             response = self.response_generator.generate_response(
                 query=query,
                 retrieved_docs=reranked_documents,
-                picture_paths=[],  # Không còn pictures
+                picture_paths=[],
                 chat_history=chat_history
             )
             
-            # Add timing information
-            processing_time = time.time() - start_time
-            response["processing_time"] = processing_time
+            response["processing_time"] = time.time() - start_time
+            response["search_type"] = retrieved_documents[0]["search_type"] if retrieved_documents else "none"
             
             return response
         
@@ -206,10 +192,10 @@ class DocumentRAG:
             self.logger.error(f"Error processing query: {e}")
             import traceback
             self.logger.error(traceback.format_exc())
-            # Return error response
             return {
                 "response": f"I encountered an error while processing your query: {str(e)}",
                 "sources": [],
                 "confidence": 0.0,
-                "processing_time": time.time() - start_time
+                "processing_time": time.time() - start_time,
+                "search_type": "none"
             }
