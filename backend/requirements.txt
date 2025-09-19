@@ -59,3 +59,4 @@ weaviate-client
 psutil
 bandit
 safety
+aiohttp

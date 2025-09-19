@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Dict, List, Optional, Any, Literal, TypedDict, Union, Annotated
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -12,6 +13,9 @@ from app.config import Config
 from app.services.agents.rag_agent import DocumentRAG
 
 load_dotenv()
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Load configuration
 config = Config()
@@ -325,38 +329,82 @@ def process_query(query: Union[str, Dict]) -> str:
     Returns:
         Response from the appropriate agent
     """
-    graph = create_agent_graph()
-    state = init_agent_state()
-    
-    if isinstance(query, dict):
-        query_text = query.get("text", "")
-    else:
-        query_text = query
-    
-    if query_text:
-        rewrite_prompt = f"""Vui lòng viết lại truy vấn sau bằng tiếng Anh đơn giản, rõ ràng, giữ nguyên ý nghĩa và ý định ban đầu:
+    try:
+        # Input validation
+        if not query:
+            logger.warning("Empty query received")
+            return {"output": "I need a question or message to help you with."}
+        
+        # Sanitize input
+        if isinstance(query, dict):
+            query_text = query.get("text", "")
+            if not isinstance(query_text, str):
+                logger.warning("Invalid query format: text field is not a string")
+                return {"output": "Invalid input format. Please provide a text message."}
+        else:
+            query_text = str(query)
+        
+        # Limit input length to prevent abuse
+        max_input_length = 10000  # 10KB
+        if len(query_text) > max_input_length:
+            logger.warning(f"Query too long: {len(query_text)} characters")
+            return {"output": "Your message is too long. Please keep it under 10,000 characters."}
+        
+        # Basic content validation - check for potentially malicious patterns
+        suspicious_patterns = ['<script', 'javascript:', 'data:', 'vbscript:', 'onload=', 'onerror=']
+        query_lower = query_text.lower()
+        if any(pattern in query_lower for pattern in suspicious_patterns):
+            logger.warning("Suspicious content detected in query", extra={'security_related': True})
+            return {"output": "Your message contains content that cannot be processed. Please rephrase your question."}
+        
+        graph = create_agent_graph()
+        state = init_agent_state()
+        
+        # Query rewriting with error handling
+        if query_text.strip():
+            try:
+                rewrite_prompt = f"""Vui lòng viết lại truy vấn sau bằng tiếng Anh đơn giản, rõ ràng, giữ nguyên ý nghĩa và ý định ban đầu:
 
         Truy vấn gốc: {query_text}
 
         Truy vấn viết lại:"""
+                
+                rewritten_query = config.conversation.llm.invoke(rewrite_prompt)
+                
+                if isinstance(query, dict):
+                    query["text"] = rewritten_query.content
+                else:
+                    query = rewritten_query.content
+                    
+            except Exception as e:
+                logger.error(f"Query rewriting failed: {e}")
+                # Continue with original query if rewriting fails
+                logger.info("Proceeding with original query due to rewriting failure")
         
-        rewritten_query = config.conversation.llm.invoke(rewrite_prompt)
+        state["current_input"] = query
+        display_text = query_text if query_text else str(query)
+        state["messages"] = [HumanMessage(content=display_text)]
         
-        if isinstance(query, dict):
-            query["text"] = rewritten_query.content
-        else:
-            query = rewritten_query.content
-    
-    state["current_input"] = query
-    display_text = query_text if query_text else str(query)
-    state["messages"] = [HumanMessage(content=display_text)]
-    
-    result = graph.invoke(state, thread_config)
-    
-    if len(result["messages"]) > config.max_conversation_history:
-        result["messages"] = result["messages"][-config.max_conversation_history:]
-    
-    for m in result["messages"]:
-        m.pretty_print()
-    
-    return result
+        # Execute the agent graph with error handling
+        try:
+            result = graph.invoke(state, thread_config)
+        except Exception as e:
+            logger.error(f"Agent graph execution failed: {e}")
+            return {"output": "I apologize, but I'm having trouble processing your request right now. Please try again later."}
+        
+        # Limit conversation history to prevent memory issues
+        if len(result["messages"]) > config.max_conversation_history:
+            result["messages"] = result["messages"][-config.max_conversation_history:]
+        
+        # Log conversation for debugging (be careful not to log sensitive data)
+        try:
+            for m in result["messages"]:
+                m.pretty_print()
+        except Exception as e:
+            logger.warning(f"Failed to print messages: {e}")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in process_query: {e}")
+        return {"output": "I apologize, but I encountered an error while processing your request. Please try again."}
