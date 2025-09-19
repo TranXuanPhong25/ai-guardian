@@ -1,0 +1,26 @@
+{
+  "timestamp": "2025-09-19T13:56:19.018752",
+  "system_info": {
+    "cpu_count": 4,
+    "memory_total_gb": 15.620681762695312,
+    "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]"
+  },
+  "pii_detection": {},
+  "memory_analysis": {},
+  "batch_analysis": {},
+  "bottlenecks": {
+    "critical": [],
+    "warning": [],
+    "optimization_opportunities": []
+  },
+  "recommendations": [
+    "\n\ud83d\udd27 GENERAL RECOMMENDATIONS:",
+    "  \u2022 Implement connection pooling for database operations",
+    "  \u2022 Add async/await optimization for I/O operations",
+    "  \u2022 Implement Redis caching for frequent lookups",
+    "  \u2022 Add performance monitoring and alerting",
+    "  \u2022 Consider using FastAPI background tasks for heavy operations",
+    "  \u2022 Implement rate limiting to prevent resource exhaustion"
+  ],
+  "analysis_duration": 13.032816410064697
+}
