@@ -95,6 +95,44 @@ pnpm-lock.yaml
 
 # Log files
 *.log
+logs/
+/var/log/
+
+# Security scan results
+bandit_report.json
+safety_report.json
+security_scan_*.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+
+# Database files (if using SQLite for development)
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificate files
+*.pem
+*.key
+*.crt
+*.cert
+
+# IDE specific files
+.idea/
+*.sublime-*
+.vscode/settings.json
+.vscode/launch.json
+
+# OS specific files
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # Frontend build
 frontend/.next/

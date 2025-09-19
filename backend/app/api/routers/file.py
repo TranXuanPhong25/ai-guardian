@@ -4,6 +4,8 @@ import tempfile
 import requests
 from urllib.parse import urlparse
 import os
+import mimetypes
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, HTTPException
 from app.schemas import file as file_schema
@@ -20,6 +22,46 @@ from app.dependencies import verify_jwt
 router = APIRouter(prefix="/file", tags=["File"])
 logger = logging.getLogger(__name__)
 
+# Security configuration
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+ALLOWED_EXTENSIONS = {
+    '.txt', '.pdf', '.docx', '.doc', '.xlsx', '.xls', '.csv',
+    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff'
+}
+ALLOWED_MIME_TYPES = {
+    'text/plain', 'application/pdf', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/csv', 'image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/tiff'
+}
+
+def validate_file_security(file: UploadFile) -> None:
+    """Validate file for security concerns."""
+    if not file.filename:
+        raise HTTPException(status_code=422, detail="No filename provided")
+    
+    # Check file size
+    if file.size and file.size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB")
+    
+    # Validate file extension
+    file_extension = Path(file.filename).suffix.lower()
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=422, 
+            detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    # Validate MIME type
+    if file.content_type and file.content_type not in ALLOWED_MIME_TYPES:
+        raise HTTPException(status_code=422, detail="Invalid file type")
+    
+    # Additional security checks
+    filename = file.filename.lower()
+    dangerous_patterns = ['../', '..\\', '/etc/', '/var/', '/usr/', 'c:\\', '.exe', '.bat', '.cmd', '.scr']
+    if any(pattern in filename for pattern in dangerous_patterns):
+        raise HTTPException(status_code=422, detail="Potentially dangerous filename detected")
+
 @router.post("/upload", response_model=file_schema.FileUploadResponse)
 def upload_file(file: UploadFile = FastAPIFile(...), user=Depends(verify_jwt), db: Session = Depends(get_db)):
     """
@@ -30,15 +72,19 @@ def upload_file(file: UploadFile = FastAPIFile(...), user=Depends(verify_jwt), d
     - Trả về thông tin file vừa upload.
     """
     try:
-        # Validate file
-        if not file.filename:
-            raise HTTPException(status_code=422, detail="No filename provided")
+        # Security validation
+        validate_file_security(file)
         
-        # Sinh tên file duy nhất để tránh trùng lặp
-        file_extension = os.path.splitext(file.filename)[1]
-        unique_filename = f"{uuid4().hex}_{file.filename}"
+        # Sanitize filename
+        safe_filename = "".join(c for c in file.filename if c.isalnum() or c in '._- ').strip()
+        if not safe_filename:
+            safe_filename = "uploaded_file"
+        
+        # Generate unique filename to avoid conflicts
+        file_extension = Path(file.filename).suffix.lower()
+        unique_filename = f"{uuid4().hex}_{safe_filename}"
 
-        # Upload file lên MinIO
+        # Upload file to MinIO
         file.file.seek(0)
         url = upload_file_to_minio(
             file.file, 
@@ -46,10 +92,10 @@ def upload_file(file: UploadFile = FastAPIFile(...), user=Depends(verify_jwt), d
             content_type=file.content_type or "application/octet-stream"
         )
 
-        # Tạo đối tượng File và lưu vào database
+        # Create File object and save to database
         file_obj = File(
             user_id=user.user.id,
-            filename=file.filename,
+            filename=safe_filename,
             file_path=url,
             created_at=datetime.utcnow()
         )
@@ -57,6 +103,8 @@ def upload_file(file: UploadFile = FastAPIFile(...), user=Depends(verify_jwt), d
         db.commit()
         db.refresh(file_obj)
 
+        logger.info(f"File uploaded successfully: {safe_filename} by user {user.user.id}")
+        
         return file_schema.FileUploadResponse(
             file_id=file_obj.file_id,
             filename=file_obj.filename,
@@ -64,26 +112,42 @@ def upload_file(file: UploadFile = FastAPIFile(...), user=Depends(verify_jwt), d
             created_at=file_obj.created_at
         )
     
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
     except Exception as e:
         logger.error(f"Error uploading file: {str(e)}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Upload failed due to server error")
 
 @router.post("/extract", response_model=file_schema.FileExtractResponse)
-def extract_file_api(body:dict, db: Session = Depends(get_db)):
+def extract_file_api(body: dict, user=Depends(verify_jwt), db: Session = Depends(get_db)):
+    """
+    API extract text từ file đã upload.
+    Only allows extraction for files owned by the authenticated user.
+    """
+    # Input validation
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=422, detail="Request body must be a JSON object")
+    
     file_id = body.get("file_id")
     if not file_id:
         raise HTTPException(status_code=422, detail="file_id is required")
-    """
-    API extract text từ file đã upload
-    """
+    
+    if not isinstance(file_id, int) or file_id <= 0:
+        raise HTTPException(status_code=422, detail="file_id must be a positive integer")
+    
     try:
-        # Lấy thông tin file từ DB
-        file_obj = db.query(File).filter(File.file_id == file_id).first()
-        if not file_obj:
-            raise HTTPException(status_code=404, detail="File not found")
+        # Get file information from DB with user ownership check
+        file_obj = db.query(File).filter(
+            File.file_id == file_id,
+            File.user_id == user.user.id  # Security: ensure user owns the file
+        ).first()
         
-        # Nếu đã extract rồi thì return luôn
+        if not file_obj:
+            raise HTTPException(status_code=404, detail="File not found or access denied")
+        
+        # If already extracted, return cached result
         if file_obj.extracted_text:
             return file_schema.FileExtractResponse(
                 file_id=file_obj.file_id,
@@ -93,8 +157,12 @@ def extract_file_api(body:dict, db: Session = Depends(get_db)):
         file_url = file_obj.file_path
         parsed = urlparse(file_url)
         
+        # Validate URL
+        if not all([parsed.scheme, parsed.netloc]):
+            raise HTTPException(status_code=400, detail="Invalid file URL")
+        
         # Determine file extension from filename
-        file_extension = os.path.splitext(file_obj.filename)[1].lower()
+        file_extension = Path(file_obj.filename).suffix.lower()
         if not file_extension:
             file_extension = ".pdf"  # default
         # Extract text based on URL type

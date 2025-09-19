@@ -56,3 +56,6 @@ langchain_google_genai
 
 openpyxl
 weaviate-client
+psutil
+bandit
+safety
